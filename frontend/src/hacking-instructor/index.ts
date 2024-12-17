@@ -4,7 +4,7 @@
  */
 
 import snarkdown from 'snarkdown'
-import DOMPurify from 'dompurify';
+import sanitizeHtml from 'sanitize-html'
 
 import { LoginAdminInstruction } from './challenges/loginAdmin'
 import { DomXssInstruction } from './challenges/domXss'
@@ -109,11 +109,7 @@ function loadHint (hint: ChallengeHint): HTMLElement {
 
   const textBox = document.createElement('span')
   textBox.style.flexGrow = '2'
-  textBox.innerHTML = DOMPurify.sanitize(snarkdown(hint.text), {
-  USE_PROFILES: { html: true },  // Sanitize HTML
-  ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'p', 'a', 'img'], // Allow safe tags
-  ALLOWED_ATTR: ['href', 'src', 'alt'], // Allow safe attributes
-});
+  textBox.innerHTML = sanitizeHtml(snarkdown(hint.text))
 
 
   const cancelButton = document.createElement('button')
