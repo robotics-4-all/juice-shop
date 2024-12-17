@@ -41,19 +41,20 @@ import authenticatedUsers from './routes/authenticatedUsers'
 
 const startTime = Date.now()
 const finale = require('finale-rest')
-const express = require('express')
-const compression = require('compression')
-const helmet = require('helmet')
-const featurePolicy = require('feature-policy')
+import express from 'express'
+import compression from 'compression'
+import helmet from 'helmet'
+import featurePolicy from 'feature-policy'
 const errorhandler = require('errorhandler')
-const cookieParser = require('cookie-parser')
-const serveIndex = require('serve-index')
-const bodyParser = require('body-parser')
-const cors = require('cors')
+import cookieParser from 'cookie-parser'
+import serveIndex from 'serve-index'
+import bodyParser from 'body-parser'
+import cors from 'cors'
 const securityTxt = require('express-security.txt')
 const robots = require('express-robots-txt')
-const yaml = require('js-yaml')
-const swaggerUi = require('swagger-ui-express')
+import yaml from 'js-yaml'
+import swaggerUi from 'swagger-ui-express'
+
 const RateLimit = require('express-rate-limit')
 const ipfilter = require('express-ipfilter').IpFilter
 const swaggerDocument = yaml.load(fs.readFileSync('./swagger.yml', 'utf8'))
@@ -87,12 +88,12 @@ const login = require('./routes/login')
 const changePassword = require('./routes/changePassword')
 const resetPassword = require('./routes/resetPassword')
 const securityQuestion = require('./routes/securityQuestion')
-const search = require('./routes/search')
-const coupon = require('./routes/coupon')
-const basket = require('./routes/basket')
-const order = require('./routes/order')
-const verify = require('./routes/verify')
-const recycles = require('./routes/recycles')
+import { searchProducts as search } from './routes/search'
+import { applyCoupon as coupon } from './routes/coupon'
+import { retrieveBasket } from './routes/basket'
+import { placeOrder as order } from './routes/order'
+import * as verify from './routes/verify'
+import { getRecycleItem, blockRecycleItems } from './routes/recycles'
 const b2bOrder = require('./routes/b2bOrder')
 const showProductReviews = require('./routes/showProductReviews')
 const createProductReviews = require('./routes/createProductReviews')
@@ -122,8 +123,8 @@ const payment = require('./routes/payment')
 const wallet = require('./routes/wallet')
 const orderHistory = require('./routes/orderHistory')
 const delivery = require('./routes/delivery')
-const deluxe = require('./routes/deluxe')
-const memory = require('./routes/memory')
+import { upgradeToDeluxe, deluxeMembershipStatus } from './routes/deluxe';
+import {addMemory, getMemories} from './routes/memory'
 const chatbot = require('./routes/chatbot')
 const locales = require('./data/static/locales.json')
 const i18n = require('i18n')
@@ -295,7 +296,7 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   app.post('/file-upload', uploadToMemory.single('file'), ensureFileIsPassed, metrics.observeFileUploadMetricsMiddleware(), handleZipFileUpload, checkUploadSize, checkFileType, handleXmlUpload)
   app.post('/profile/image/file', uploadToMemory.single('file'), ensureFileIsPassed, metrics.observeFileUploadMetricsMiddleware(), profileImageFileUpload())
   app.post('/profile/image/url', uploadToMemory.single('file'), profileImageUrlUpload())
-  app.post('/rest/memories', uploadToDisk.single('image'), ensureFileIsPassed, security.appendUserId(), metrics.observeFileUploadMetricsMiddleware(), memory.addMemory())
+  app.post('/rest/memories', uploadToDisk.single('image'), ensureFileIsPassed, security.appendUserId(), metrics.observeFileUploadMetricsMiddleware(), addMemory())
 
   app.use(bodyParser.text({ type: '*/*' }))
   app.use(function jsonParser (req: Request, res: Response, next: NextFunction) {
@@ -360,10 +361,10 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   app.post('/api/Complaints', security.isAuthorized())
   app.use('/api/Complaints/:id', security.denyAll())
   /* Recycles: POST and GET allowed when logged in only */
-  app.get('/api/Recycles', recycles.blockRecycleItems())
+  app.get('/api/Recycles', blockRecycleItems())
   app.post('/api/Recycles', security.isAuthorized())
   /* Challenge evaluation before finale takes over */
-  app.get('/api/Recycles/:id', recycles.getRecycleItem())
+  app.get('/api/Recycles/:id', getRecycleItem())
   app.put('/api/Recycles/:id', security.denyAll())
   app.delete('/api/Recycles/:id', security.denyAll())
   /* SecurityQuestions: Only GET list of questions allowed. */
@@ -568,7 +569,7 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   app.get('/rest/user/whoami', security.updateAuthenticatedUsers(), currentUser())
   app.get('/rest/user/authentication-details', authenticatedUsers())
   app.get('/rest/products/search', search())
-  app.get('/rest/basket/:id', basket())
+  app.get('/rest/basket/:id', retrieveBasket())
   app.post('/rest/basket/:id/checkout', order())
   app.put('/rest/basket/:id/coupon/:coupon', coupon())
   app.get('/rest/admin/application-version', appVersion())
@@ -594,9 +595,9 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   app.put('/rest/order-history/:id/delivery-status', security.isAccounting(), orderHistory.toggleDeliveryStatus())
   app.get('/rest/wallet/balance', security.appendUserId(), wallet.getWalletBalance())
   app.put('/rest/wallet/balance', security.appendUserId(), wallet.addWalletBalance())
-  app.get('/rest/deluxe-membership', deluxe.deluxeMembershipStatus())
-  app.post('/rest/deluxe-membership', security.appendUserId(), deluxe.upgradeToDeluxe())
-  app.get('/rest/memories', memory.getMemories())
+  app.get('/rest/deluxe-membership', deluxeMembershipStatus())
+  app.post('/rest/deluxe-membership', security.appendUserId(), upgradeToDeluxe())
+  app.get('/rest/memories', getMemories())
   app.get('/rest/chatbot/status', chatbot.status())
   app.post('/rest/chatbot/respond', chatbot.process())
   /* NoSQL API endpoints */
