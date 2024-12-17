@@ -13,7 +13,7 @@ import FormData from 'form-data';
 const jsonHeader = { 'content-type': 'application/json' };
 const REST_URL = 'http://localhost:3000/rest';
 
-// Helper function to login and get the auth token
+// Helper function to login and get the auth token !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 const login = (email: string, password: string): Promise<string> => {
   return new Promise<string>((resolve, reject) => {
     frisby.post(REST_URL + '/user/login', {
@@ -29,7 +29,7 @@ const login = (email: string, password: string): Promise<string> => {
   });
 };
 
-// Helper function to export data
+// Helper function to export data !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 const exportData = (token: string, body: object): Promise<frisby.FrisbyResponse> => {
   return frisby.post(REST_URL + '/user/data-export', {
     headers: { Authorization: 'Bearer ' + token, 'content-type': 'application/json' },
