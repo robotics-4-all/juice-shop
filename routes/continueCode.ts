@@ -50,3 +50,5 @@ module.exports.continueCodeFixIt = function continueCodeFixIt () {
     res.json({ continueCode })
   }
 }
+
+export default module.exports

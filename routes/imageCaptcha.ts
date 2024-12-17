@@ -52,3 +52,5 @@ imageCaptchas.verifyCaptcha = () => (req: Request, res: Response, next: NextFunc
 }
 
 module.exports = imageCaptchas
+
+export default module.exports

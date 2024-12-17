@@ -29,3 +29,4 @@ module.exports = function productReviews () {
     })
   }
 }
+export default module.exports

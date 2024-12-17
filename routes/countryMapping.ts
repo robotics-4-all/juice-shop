@@ -21,3 +21,5 @@ module.exports = function countryMapping (config = require('config')) {
     }
   }
 }
+
+export default module.exports

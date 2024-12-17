@@ -11,3 +11,5 @@ module.exports = function retrieveAppConfiguration () {
     res.json({ config })
   }
 }
+
+export default module.exports

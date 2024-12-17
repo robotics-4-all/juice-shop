@@ -26,3 +26,5 @@ module.exports = function trackOrder () {
     })
   }
 }
+
+export default module.exports

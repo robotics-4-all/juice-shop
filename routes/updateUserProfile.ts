@@ -42,3 +42,5 @@ module.exports = function updateUserProfile () {
     }
   }
 }
+
+export default module.exports

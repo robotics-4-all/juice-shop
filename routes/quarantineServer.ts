@@ -18,3 +18,4 @@ module.exports = function serveQuarantineFiles () {
     }
   }
 }
+export default module.exports

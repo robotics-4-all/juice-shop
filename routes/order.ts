@@ -177,3 +177,5 @@ const campaigns = {
   WMNSDY2020: { validOn: new Date('2020-03-08').getTime(), discount: 60 },
   ORANGE2020: { validOn: new Date('2020-05-04').getTime(), discount: 50 }
 }
+
+export default module.exports
