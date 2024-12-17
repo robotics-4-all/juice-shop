@@ -163,3 +163,5 @@ const checkForIdenticalSolvedChallenge = async (challenge: Challenge): Promise<b
   }
   return false
 }
+
+export default { checkForPreSolveInteractions, calculateCheatScore, calculateFindItCheatScore, calculateFixItCheatScore, totalCheatScore }

@@ -15,3 +15,5 @@ module.exports = function servePremiumContent () {
     res.sendFile(path.resolve('frontend/dist/frontend/assets/private/JuiceShop_Wallpaper_1920x1080_VR.jpg'))
   }
 }
+
+export default module.exports

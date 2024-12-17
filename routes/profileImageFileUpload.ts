@@ -52,3 +52,5 @@ module.exports = function fileUpload () {
     }
   }
 }
+
+export default module.exports

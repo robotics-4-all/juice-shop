@@ -230,3 +230,5 @@ exports.observeMetrics = function observeMetrics () {
     updateLoop
   }
 }
+
+export default module.exports

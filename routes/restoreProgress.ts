@@ -71,3 +71,5 @@ module.exports.restoreProgressFixIt = function restoreProgressFixIt () {
     }
   }
 }
+
+export default module.exports

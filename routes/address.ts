@@ -34,3 +34,5 @@ module.exports.delAddressById = function delAddressById () {
     }
   }
 }
+
+export default module.exports
