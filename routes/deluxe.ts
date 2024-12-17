@@ -14,7 +14,7 @@ import { challenges } from '../data/datacache'
 const security = require('../lib/insecurity')
 
 module.exports.upgradeToDeluxe = function upgradeToDeluxe () {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response) => {
     try {
       const user = await UserModel.findOne({ where: { id: req.body.UserId, role: security.roles.customer } })
       if (user == null) {
