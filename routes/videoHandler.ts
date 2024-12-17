@@ -11,8 +11,8 @@ import * as utils from '../lib/utils'
 import { AllHtmlEntities as Entities } from 'html-entities'
 import { challenges } from '../data/datacache'
 
-const pug = require('pug')
-const themes = require('../views/themes/themes').themes
+import pug from 'pug'
+import { themes } from '../views/themes/themes'
 const entities = new Entities()
 
 exports.getVideo = () => {
