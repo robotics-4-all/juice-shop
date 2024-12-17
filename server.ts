@@ -70,7 +70,7 @@ import redirect from './routes/redirect.js';
 const vulnCodeSnippet = require('./routes/vulnCodeSnippet')
 const vulnCodeFixes = require('./routes/vulnCodeFixes')
 import angular from './routes/angular.js';
-import easterEgg from './routes/easterEgg.js';
+const easterEgg = require('./routes/easterEgg.js')
 import premiumReward from './routes/premiumReward.js';
 import privacyPolicyProof from './routes/privacyPolicyProof.js';
 import appVersion from './routes/appVersion.js';

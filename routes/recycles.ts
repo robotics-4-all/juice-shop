@@ -20,7 +20,7 @@ export const getRecycleItems = () => (req: Request, res: Response) => {
   })
 }
 
-export const blockRecycleItems = () => (req: Request, res: Response) => {
+export const blockRecycleItems = () => (_req: Request, res: Response) => {
   const errMsg = { err: 'Sorry, this endpoint is not supported.' }
   return res.send(utils.queryResultToJson(errMsg))
 }

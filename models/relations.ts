@@ -1,4 +1,3 @@
-import { type Sequelize } from 'sequelize/types'
 import { AddressModel } from './address'
 import { BasketModel } from './basket'
 import { BasketItemModel } from './basketitem'

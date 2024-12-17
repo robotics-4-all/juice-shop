@@ -9,7 +9,7 @@ import { challenges } from '../data/datacache'
 import * as security from './insecurity'
 import * as challengeUtils from './challengeUtils'
 
-export async function productPrice (query: string, _: string) {
+export async function productPrice (query: string) {
   const products = await ProductModel.findAll()
   const queriedProducts = products
     .filter((product: Product) => fuzz.partial_ratio(query, product.name) > 60)
