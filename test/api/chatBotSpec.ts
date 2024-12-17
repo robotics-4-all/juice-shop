@@ -139,6 +139,12 @@ describe('/chatbot', () => {
             query: testCommand
           }
         })
+        .post(REST_URL + 'chatbot/respond', {
+          body: {
+            action: 'query',
+            query: testCommand
+          }
+        })
         .expect('status', 200)
         .promise()
         .then(({ json }) => {

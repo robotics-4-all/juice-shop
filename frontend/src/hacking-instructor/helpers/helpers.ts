@@ -35,7 +35,12 @@ export function waitForInputToHaveValue (inputSelector: string, value: string, o
       const propertyChain = options.replacement[1].split('.')
       let replacementValue = config
       for (const property of propertyChain) {
-        replacementValue = replacementValue[property]
+        if (replacementValue && Object.prototype.hasOwnProperty.call(replacementValue, property)) {
+          replacementValue = replacementValue[property];
+        } else {
+          // If the property doesn't exist or is unsafe, handle it
+          throw new Error(`Property "${property}" does not exist or is unsafe.`);
+        }
       }
       value = value.replace(options.replacement[0], replacementValue)
     }

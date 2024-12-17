@@ -2,9 +2,17 @@ import path from 'path'
 import { readFile } from 'fs/promises'
 import { safeLoad } from 'js-yaml'
 import logger from '../lib/logger'
+import dotenv from 'dotenv';
+dotenv.config();
 
 export async function loadStaticData (file: string) {
-  const filePath = path.resolve('./data/static/' + file + '.yml')
+  const sanitizedFile = path.basename(file);
+  const filePath = path.resolve('./data/static/' + sanitizedFile + '.yml');
+  const allowedDir = path.resolve('./data/static');
+  if (!filePath.startsWith(allowedDir)) {
+    logger.error(`Invalid file path attempt: "${filePath}"`);
+    return;
+  }
   return await readFile(filePath, 'utf8')
     .then(safeLoad)
     .catch(() => logger.error('Could not open file: "' + filePath + '"'))
@@ -52,7 +60,13 @@ export interface StaticUserCard {
   expYear: number
 }
 export async function loadStaticUserData (): Promise<StaticUser[]> {
-  return await loadStaticData('users') as StaticUser[]
+  const users = await loadStaticData('users') as StaticUser[];
+  return users.map(user => {
+    if (user.totpSecret) {
+      user.totpSecret = process.env.TOTP_SECRET || user.totpSecret; // Look for environment variable, fallback to YAML value if not set
+    }
+    return user;
+  });
 }
 
 export interface StaticChallenge {
