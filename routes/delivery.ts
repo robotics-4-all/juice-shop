@@ -3,15 +3,14 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { type Request, type Response, type NextFunction } from "express";
+import { type Request, type Response } from "express";
 import { DeliveryModel } from "../models/delivery";
 
 const security = require("../lib/insecurity");
 
-
-module.exports.getDeliveryMethods = function getDeliveryMethods () {
+module.exports.getDeliveryMethods = function getDeliveryMethods() {
   return async (req: Request, res: Response) => {
-    const methods = await DeliveryModel.findAll()
+    const methods = await DeliveryModel.findAll();
     if (methods) {
       const sendMethods = [];
       for (const method of methods) {
@@ -30,10 +29,9 @@ module.exports.getDeliveryMethods = function getDeliveryMethods () {
   };
 };
 
-
-module.exports.getDeliveryMethod = function getDeliveryMethod () {
+module.exports.getDeliveryMethod = function getDeliveryMethod() {
   return async (req: Request, res: Response) => {
-    const method = await DeliveryModel.findOne({ where: { id: req.params.id } })
+    const method = await DeliveryModel.findOne({ where: { id: req.params.id } });
     if (method != null) {
       const sendMethod = {
         id: method.id,
