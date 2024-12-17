@@ -4,7 +4,7 @@
  */
 
 import snarkdown from 'snarkdown'
-
+import DOMPurify from 'dompurify';
 import { LoginAdminInstruction } from './challenges/loginAdmin'
 import { DomXssInstruction } from './challenges/domXss'
 import { ScoreBoardInstruction } from './challenges/scoreBoard'
@@ -35,6 +35,12 @@ const challengeInstructions: ChallengeInstruction[] = [
   AdminSectionInstruction,
   ReflectedXssInstruction
 ]
+
+function sanitizeHtml(html) {
+  const tempDiv = document.createElement('div');
+  tempDiv.textContent = html; // Escapes HTML by treating it as plain text
+  return tempDiv.innerHTML;
+}
 
 export interface ChallengeInstruction {
   name: string
@@ -108,7 +114,7 @@ function loadHint (hint: ChallengeHint): HTMLElement {
 
   const textBox = document.createElement('span')
   textBox.style.flexGrow = '2'
-  textBox.innerHTML = snarkdown(hint.text)
+  textBox.innerHTML = DOMPurify.sanitize(snarkdown(hint.text));
 
   const cancelButton = document.createElement('button')
   cancelButton.id = 'cancelButton'
