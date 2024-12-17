@@ -21,7 +21,13 @@ export const findFilesWithCodeChallenges = async (paths: readonly string[]): Pro
     if ((await fs.lstat(currPath)).isDirectory()) {
       const files = await fs.readdir(currPath)
       const moreMatches = await findFilesWithCodeChallenges(
-        files.map(file => path.resolve(currPath, file))
+        files.map(file => {
+          const resolvedPath = path.resolve(currPath, file)
+          if (!resolvedPath.startsWith(currPath)) {
+            throw new Error('Invalid file path')
+          }
+          return resolvedPath
+        })
       )
       matches.push(...moreMatches)
     } else {
@@ -41,6 +47,10 @@ export const findFilesWithCodeChallenges = async (paths: readonly string[]): Pro
   }
 
   return matches
+}
+
+function isValidChallengeKey (key: string): boolean {
+  return /^[a-zA-Z0-9]+$/.test(key)
 }
 
 function getCodeChallengesFromFile (file: FileMatch) {
@@ -72,10 +82,27 @@ function getCodingChallengeFromFileContent (source: string, challengeKey: string
   if (lines.length === 1) lines = snippet.split('\r')
   const vulnLines = []
   const neutralLines = []
+  if (!isValidChallengeKey(challengeKey)) {
+    throw new Error('Invalid challenge key format')
+  }
+  const vulnPattern = `vuln-code-snippet vuln-line.*${challengeKey}`
+  const neutralPattern = `vuln-code-snippet neutral-line.*${challengeKey}`
+
+  const vulnPatternRegex = new RegExp(vulnPattern)
+  const neutralPatternRegex = new RegExp(neutralPattern)
+
+  // Check if regex patterns are safe
+  if (vulnPatternRegex.test(vulnPattern) || neutralPatternRegex.test(neutralPattern)) {
+    throw new Error('Unsafe regex pattern detected')
+  }
+
+  // Use the validated and safe regex patterns
+  const vulnRegex = new RegExp(vulnPattern)
+  const neutralRegex = new RegExp(neutralPattern)
   for (let i = 0; i < lines.length; i++) {
-    if (new RegExp(`vuln-code-snippet vuln-line.*${challengeKey}`).exec(lines[i]) != null) {
+    if (vulnRegex.exec(lines[i]) != null) {
       vulnLines.push(i + 1)
-    } else if (new RegExp(`vuln-code-snippet neutral-line.*${challengeKey}`).exec(lines[i]) != null) {
+    } else if (neutralRegex.exec(lines[i]) != null) {
       neutralLines.push(i + 1)
     }
   }
