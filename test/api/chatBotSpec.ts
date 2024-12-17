@@ -69,34 +69,56 @@ describe('/chatbot', () => {
         .promise()
     })
   })
-
+  async function sendQuery(token:string, query:string, actionp:string, bodyp: string){
+    const response = await frisby.setup({
+      request: {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      }
+    })
+      .post(REST_URL + 'chatbot/respond', {
+        body: {
+          action: 'query',
+          query: query
+        }
+      })
+      .expect('status', 200)
+      .expect('json', 'action', actionp)
+      .expect('json', 'body', bodyp)
+      .promise();
+  
+    return response;
+  }
   describe('/respond', () => {
     it('Asks for username if not defined', async () => {
       const { token } = await login({
         email: `J12934@${config.get<string>('application.domain')}`,
         password: '0Y8rMnww$*9VFYE§59-!Fg1L6t&6lB'
       })
+      const testCommand = trainingData.data[0].utterances[0];
 
-      const testCommand = trainingData.data[0].utterances[0]
+      await sendQuery(token, testCommand, 'namequery', 'I\'m sorry I didn\'t get your name. What shall I call you?');
 
-      await frisby.setup({
-        request: {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      }, true)
-        .post(REST_URL + 'chatbot/respond', {
-          body: {
-            action: 'query',
-            query: testCommand
-          }
-        })
-        .expect('status', 200)
-        .expect('json', 'action', 'namequery')
-        .expect('json', 'body', 'I\'m sorry I didn\'t get your name. What shall I call you?')
-        .promise()
+      // await frisby.setup({
+      //   request: {
+      //     headers: {
+      //       Authorization: `Bearer ${token}`,
+      //       'Content-Type': 'application/json'
+      //     }
+      //   }
+      // }, true)
+      //   .post(REST_URL + 'chatbot/respond', {
+      //     body: {
+      //       action: 'query',
+      //       query: testCommand
+      //     }
+      //   })
+      // .expect('status', 200)
+      // .expect('json', 'action', 'namequery')
+      // .expect('json', 'body', 'I\'m sorry I didn\'t get your name. What shall I call you?')
+      // .promise()
     })
 
     it('Returns greeting if username is defined', async () => {
@@ -111,24 +133,25 @@ describe('/chatbot', () => {
       bot.addUser('1337', 'bkimminich')
       const testCommand = trainingData.data[0].utterances[0]
 
-      await frisby.setup({
-        request: {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      }, true)
-        .post(REST_URL + 'chatbot/respond', {
-          body: {
-            action: 'query',
-            query: testCommand
-          }
-        })
-        .expect('status', 200)
-        .expect('json', 'action', 'response')
-        .expect('json', 'body', bot.greet('1337'))
-        .promise()
+      await sendQuery(token, testCommand, 'response', bot.greet('1337'));
+    //   await frisby.setup({
+    //     request: {
+    //       headers: {
+    //         Authorization: `Bearer ${token}`,
+    //         'Content-Type': 'application/json'
+    //       }
+    //     }
+    //   }, true)
+    //     .post(REST_URL + 'chatbot/respond', {
+    //       body: {
+    //         action: 'query',
+    //         query: testCommand
+    //       }
+    //     })
+    // .expect('status', 200)
+    // .expect('json', 'action', 'response')
+    // .expect('json', 'body', bot.greet('1337'))
+    // .promise()
     })
 
     it('Returns proper response for registered user', async () => {
