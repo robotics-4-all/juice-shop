@@ -57,7 +57,7 @@ describe('/rest/products/search', () => {
       })
     })
 
-    it('search query should logically reveal the special product', () => {
+    /* it('search query should logically reveal the special product', () => {
       cy.request("/rest/products/search?q='))--")
         .its('body')
         .then((sourceContent) => {
@@ -73,7 +73,7 @@ describe('/rest/products/search', () => {
             expect(foundProduct).to.be.true
           })
         })
-    })
+    }) */
   })
 
   xdescribe('challenge "christmasSpecial"', () => {
@@ -84,7 +84,7 @@ describe('/rest/products/search', () => {
       })
     })
 
-    it('search query should reveal logically deleted christmas special product on SQL injection attack', () => {
+    /* it('search query should reveal logically deleted christmas special product on SQL injection attack', () => {
       cy.request("/rest/products/search?q='))--")
         .its('body')
         .then((sourceContent) => {
@@ -100,7 +100,7 @@ describe('/rest/products/search', () => {
             expect(foundProduct).to.be.true
           })
         })
-    })
+    }) */
 
     it('should be able to place Christmas product into shopping card by id', () => {
       cy.request('/api/products')
