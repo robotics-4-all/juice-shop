@@ -43,7 +43,7 @@ exports.observeRequestMetricsMiddleware = function observeRequestMetricsMiddlewa
     labelNames: ['status_code']
   })
 
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (_req: Request, res: Response, next: NextFunction) => {
     onFinished(res, () => {
       const statusCode = `${Math.floor(res.statusCode / 100)}XX`
       httpRequestsMetric.labels(statusCode).inc()

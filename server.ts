@@ -64,43 +64,43 @@ const {
   checkFileType,
   handleXmlUpload
 } = require('./routes/fileUpload')
-const profileImageFileUpload = require('./routes/profileImageFileUpload')
-const profileImageUrlUpload = require('./routes/profileImageUrlUpload')
-const redirect = require('./routes/redirect')
+import profileImageFileUpload from './routes/profileImageFileUpload.js';
+import profileImageUrlUpload from './routes/profileImageUrlUpload.js';
+import redirect from './routes/redirect.js';
 const vulnCodeSnippet = require('./routes/vulnCodeSnippet')
 const vulnCodeFixes = require('./routes/vulnCodeFixes')
-const angular = require('./routes/angular')
-const easterEgg = require('./routes/easterEgg')
-const premiumReward = require('./routes/premiumReward')
-const privacyPolicyProof = require('./routes/privacyPolicyProof')
-const appVersion = require('./routes/appVersion')
-const repeatNotification = require('./routes/repeatNotification')
-const continueCode = require('./routes/continueCode')
-const restoreProgress = require('./routes/restoreProgress')
-const fileServer = require('./routes/fileServer')
-const quarantineServer = require('./routes/quarantineServer')
-const keyServer = require('./routes/keyServer')
-const logFileServer = require('./routes/logfileServer')
+import angular from './routes/angular.js';
+const easterEgg = require('./routes/easterEgg.js')
+import premiumReward from './routes/premiumReward.js';
+import privacyPolicyProof from './routes/privacyPolicyProof.js';
+import appVersion from './routes/appVersion.js';
+import repeatNotification from './routes/repeatNotification.js';
+import {continueCode, continueCodeFindIt, continueCodeFixIt} from './routes/continueCode.js';
+import { restoreProgress, restoreProgressFindIt, restoreProgressFixIt } from './routes/restoreProgress.js';
+import fileServer from './routes/fileServer.js';
+import quarantineServer from './routes/quarantineServer.js';
+import keyServer from './routes/keyServer.js';
+import logFileServer from './routes/logfileServer.js';
 const metrics = require('./routes/metrics')
-const currentUser = require('./routes/currentUser')
-const login = require('./routes/login')
-const changePassword = require('./routes/changePassword')
-const resetPassword = require('./routes/resetPassword')
-const securityQuestion = require('./routes/securityQuestion')
-const search = require('./routes/search')
-const coupon = require('./routes/coupon')
-const basket = require('./routes/basket')
-const order = require('./routes/order')
+import currentUser from './routes/currentUser.js';
+import login from './routes/login.js';
+import changePassword from './routes/changePassword.js';
+import resetPassword from './routes/resetPassword.js';
+import securityQuestion from './routes/securityQuestion.js';
+import search from './routes/search.js';
+import coupon from './routes/coupon.js';
+import basket from './routes/basket.js';
+import order from './routes/order.js';
 const verify = require('./routes/verify')
-const recycles = require('./routes/recycles')
-const b2bOrder = require('./routes/b2bOrder')
-const showProductReviews = require('./routes/showProductReviews')
-const createProductReviews = require('./routes/createProductReviews')
-const checkKeys = require('./routes/checkKeys')
-const nftMint = require('./routes/nftMint')
-const web3Wallet = require('./routes/web3Wallet')
-const updateProductReviews = require('./routes/updateProductReviews')
-const likeProductReviews = require('./routes/likeProductReviews')
+import recycles from './routes/recycles.js';
+import b2bOrder from './routes/b2bOrder.js';
+import showProductReviews from './routes/showProductReviews.js';
+import createProductReviews from './routes/createProductReviews.js';
+import {checkKeys, nftUnlocked} from './routes/checkKeys.js';
+import nftMint from './routes/nftMint.js';
+import web3Wallet from './routes/web3Wallet.js';
+import updateProductReviews from './routes/updateProductReviews.js';
+import likeProductReviews from './routes/likeProductReviews.js';
 const security = require('./lib/insecurity')
 const app = express()
 const server = require('http').Server(app)
@@ -363,7 +363,7 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   app.get('/api/Recycles', recycles.blockRecycleItems())
   app.post('/api/Recycles', security.isAuthorized())
   /* Challenge evaluation before finale takes over */
-  app.get('/api/Recycles/:id', recycles.getRecycleItem())
+  app.get('/api/Recycles/:id', recycles.getRecycleItems())
   app.put('/api/Recycles/:id', security.denyAll())
   app.delete('/api/Recycles/:id', security.denyAll())
   /* SecurityQuestions: Only GET list of questions allowed. */
@@ -574,12 +574,12 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   app.get('/rest/admin/application-version', appVersion())
   app.get('/rest/admin/application-configuration', appConfiguration())
   app.get('/rest/repeat-notification', repeatNotification())
-  app.get('/rest/continue-code', continueCode.continueCode())
-  app.get('/rest/continue-code-findIt', continueCode.continueCodeFindIt())
-  app.get('/rest/continue-code-fixIt', continueCode.continueCodeFixIt())
-  app.put('/rest/continue-code-findIt/apply/:continueCode', restoreProgress.restoreProgressFindIt())
-  app.put('/rest/continue-code-fixIt/apply/:continueCode', restoreProgress.restoreProgressFixIt())
-  app.put('/rest/continue-code/apply/:continueCode', restoreProgress.restoreProgress())
+  app.get('/rest/continue-code', continueCode())
+  app.get('/rest/continue-code-findIt', continueCodeFindIt())
+  app.get('/rest/continue-code-fixIt', continueCodeFixIt())
+  app.put('/rest/continue-code-findIt/apply/:continueCode', restoreProgressFindIt())
+  app.put('/rest/continue-code-fixIt/apply/:continueCode', restoreProgressFixIt())
+  app.put('/rest/continue-code/apply/:continueCode', restoreProgress())
   app.get('/rest/admin/application-version', appVersion())
   app.get('/rest/captcha', captcha())
   app.get('/rest/image-captcha', imageCaptcha())
@@ -606,8 +606,8 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   app.post('/rest/products/reviews', security.isAuthorized(), likeProductReviews())
 
   /* Web3 API endpoints */
-  app.post('/rest/web3/submitKey', checkKeys.checkKeys())
-  app.get('/rest/web3/nftUnlocked', checkKeys.nftUnlocked())
+  app.post('/rest/web3/submitKey', checkKeys())
+  app.get('/rest/web3/nftUnlocked', nftUnlocked())
   app.get('/rest/web3/nftMintListen', nftMint.nftMintListener())
   app.post('/rest/web3/walletNFTVerify', nftMint.walletNFTVerify())
   app.post('/rest/web3/walletExploitAddress', web3Wallet.contractExploitListener())
