@@ -11,7 +11,6 @@ import { type ComponentFixture, TestBed, waitForAsync } from '@angular/core/test
 import { MatInputModule } from '@angular/material/input'
 import { ReactiveFormsModule } from '@angular/forms'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
-
 import { MatTableModule } from '@angular/material/table'
 import { MatExpansionModule } from '@angular/material/expansion'
 import { MatDividerModule } from '@angular/material/divider'
@@ -34,7 +33,8 @@ describe('AddressSelectComponent', () => {
   let snackBar: any
   let translateService
 
-  beforeEach(waitForAsync(() => {
+  // Helper function to set up spies
+  const setUpSpies = () => {
     translateService = jasmine.createSpyObj('TranslateService', ['get'])
     translateService.get.and.returnValue(of({}))
     translateService.onLangChange = new EventEmitter()
@@ -42,6 +42,10 @@ describe('AddressSelectComponent', () => {
     translateService.onDefaultLangChange = new EventEmitter()
     snackBar = jasmine.createSpyObj('MatSnackBar', ['open'])
     snackBar.open.and.returnValue(null)
+  }
+
+  beforeEach(waitForAsync(() => {
+    setUpSpies() // Set up spies for TranslateService and MatSnackBar
 
     TestBed.configureTestingModule({
       imports: [
@@ -51,7 +55,6 @@ describe('AddressSelectComponent', () => {
         TranslateModule.forRoot(),
         HttpClientTestingModule,
         ReactiveFormsModule,
-
         BrowserAnimationsModule,
         MatCardModule,
         MatTableModule,
