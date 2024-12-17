@@ -8,7 +8,7 @@ import { BasketModel } from '../models/basket'
 
 const security = require('../lib/insecurity')
 
-module.exports = function applyCoupon () {
+export default function applyCoupon () {
   return ({ params }: Request, res: Response, next: NextFunction) => {
     const id = params.id
     let coupon: string | undefined | null = params.coupon ? decodeURIComponent(params.coupon) : undefined
