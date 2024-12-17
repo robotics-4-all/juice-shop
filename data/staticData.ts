@@ -2,6 +2,8 @@ import path from 'path'
 import { readFile } from 'fs/promises'
 import { safeLoad } from 'js-yaml'
 import logger from '../lib/logger'
+import dotenv from 'dotenv';
+dotenv.config();
 
 export async function loadStaticData (file: string) {
   const filePath = path.resolve('./data/static/' + file + '.yml')
@@ -52,7 +54,13 @@ export interface StaticUserCard {
   expYear: number
 }
 export async function loadStaticUserData (): Promise<StaticUser[]> {
-  return await loadStaticData('users') as StaticUser[]
+  const users = await loadStaticData('users') as StaticUser[];
+  return users.map(user => {
+    if (user.totpSecret) {
+      user.totpSecret = process.env[user.totpSecret] || user.totpSecret; // Look for environment variable, fallback to YAML value if not set
+    }
+    return user;
+  });
 }
 
 export interface StaticChallenge {
