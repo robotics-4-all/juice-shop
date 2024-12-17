@@ -11,9 +11,10 @@ import path from 'path'
 import * as utils from '../lib/utils'
 import { challenges } from '../data/datacache'
 
+import * as unzipper from 'unzipper';
+
 const xml2js = require('xml2js');
 const vm = require('vm')
-const unzipper = require('unzipper')
 
 function ensureFileIsPassed ({ file }: Request, res: Response, next: NextFunction) {
   if (file != null) {
@@ -34,7 +35,7 @@ function handleZipFileUpload ({ file }: Request, res: Response, next: NextFuncti
           fs.close(fd, function () {
             fs.createReadStream(tempFile)
               .pipe(unzipper.Parse())
-              .on('entry', function (entry: any) {
+              .on('entry', function (entry: unzipper.Entry) {
                 const fileName = entry.path
                 const absolutePath = path.resolve('uploads/complaints/' + fileName)
                 challengeUtils.solveIf(challenges.fileWriteChallenge, () => { return absolutePath === path.resolve('ftp/legal.md') })
@@ -82,16 +83,21 @@ function handleXmlUpload ({ file }: Request, res: Response, next: NextFunction) 
         challengeUtils.solveIf(challenges.xxeFileDisclosureChallenge, () => { return (utils.matchesEtcPasswdFile(xmlString) || utils.matchesSystemIniFile(xmlString)) })
         res.status(410)
         next(new Error('B2B customer complaints via file upload have been deprecated for security reasons: ' + utils.trunc(xmlString, 400) + ' (' + file.originalname + ')'))
-      } catch (err: any) { // TODO: Remove any
-        if (utils.contains(err.message, 'Script execution timed out')) {
-          if (challengeUtils.notSolved(challenges.xxeDosChallenge)) {
-            challengeUtils.solve(challenges.xxeDosChallenge)
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          if (utils.contains(err.message, 'Script execution timed out')) {
+            if (challengeUtils.notSolved(challenges.xxeDosChallenge)) {
+              challengeUtils.solve(challenges.xxeDosChallenge)
+            }
+            res.status(503)
+            next(new Error('Sorry, we are temporarily not available! Please try again later.'))
+          } else {
+            res.status(410)
+            next(new Error('B2B customer complaints via file upload have been deprecated for security reasons: ' + err.message + ' (' + file.originalname + ')'))
           }
-          res.status(503)
-          next(new Error('Sorry, we are temporarily not available! Please try again later.'))
         } else {
-          res.status(410)
-          next(new Error('B2B customer complaints via file upload have been deprecated for security reasons: ' + err.message + ' (' + file.originalname + ')'))
+          res.status(410);
+          next(new Error('An unknown error occurred.'));
         }
       }
     } else {
