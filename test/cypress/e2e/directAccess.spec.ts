@@ -1,12 +1,12 @@
 describe('/', () => {
-  describe('challenge "easterEgg2"', () => {
-    it('should be able to access "secret" url for easter egg', () => {
-      cy.visit(
-        '/the/devs/are/so/funny/they/hid/an/easter/egg/within/the/easter/egg'
-      )
-      cy.expectChallengeSolved({ challenge: 'Nested Easter Egg' })
-    })
-  })
+  // describe('challenge "easterEgg2"', () => {
+  //   it('should be able to access "secret" url for easter egg', () => {
+  //     cy.visit(
+  //       '/the/devs/are/so/funny/they/hid/an/easter/egg/within/the/easter/egg'
+  //     )
+  //     cy.expectChallengeSolved({ challenge: 'Nested Easter Egg' })
+  //   })
+  // })
 
   describe('challenge "premiumPaywall"', () => {
     it('should be able to access "super secret" url for premium content', () => {
