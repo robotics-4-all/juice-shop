@@ -652,14 +652,14 @@ restoreOverwrittenFilesWithOriginals().then(() => {
 
 const multer = require('multer')
 const uploadToMemory = multer({ storage: multer.memoryStorage(), limits: { fileSize: 200000 } })
-const mimeTypeMap: any = {
+const mimeTypeMap: Record<string, string> = {
   'image/png': 'png',
   'image/jpeg': 'jpg',
   'image/jpg': 'jpg'
 }
 const uploadToDisk = multer({
   storage: multer.diskStorage({
-    destination: (req: Request, file: any, cb: any) => {
+    destination: (_: Request, file: Express.Multer.File, cb: (error: Error | null, path: string) => void) => {
       const isValid = mimeTypeMap[file.mimetype]
       let error: Error | null = new Error('Invalid mime type')
       if (isValid) {
@@ -667,7 +667,7 @@ const uploadToDisk = multer({
       }
       cb(error, path.resolve('frontend/dist/frontend/assets/public/images/uploads/'))
     },
-    filename: (req: Request, file: any, cb: any) => {
+    filename: (_: Request, file: Express.Multer.File, cb: (error: null, filename: string)=> void) => {
       const name = security.sanitizeFilename(file.originalname)
         .toLowerCase()
         .split(' ')
@@ -686,7 +686,7 @@ logger.info(`Entity models ${colors.bold(Object.keys(sequelize.models).length.to
 
 // vuln-code-snippet start exposedMetricsChallenge
 /* Serve metrics */
-let metricsUpdateLoop: any
+let metricsUpdateLoop: NodeJS.Timeout
 const Metrics = metrics.observeMetrics() // vuln-code-snippet neutral-line exposedMetricsChallenge
 app.get('/metrics', metrics.serveMetrics()) // vuln-code-snippet vuln-line exposedMetricsChallenge
 errorhandler.title = `${config.get<string>('application.name')} (Express ${utils.version('express')})`
