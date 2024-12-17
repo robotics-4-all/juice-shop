@@ -412,3 +412,4 @@ function dangerousIngredients () {
       return { [Op.like]: `%${keyword}%` }
     })
 }
+export default module.exports

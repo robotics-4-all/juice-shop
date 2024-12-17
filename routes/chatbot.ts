@@ -246,3 +246,5 @@ async function getUserFromJwt (token: string): Promise<User | null> {
     })
   })
 }
+
+export default module.exports

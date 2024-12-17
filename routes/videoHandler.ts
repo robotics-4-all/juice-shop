@@ -88,3 +88,5 @@ function videoPath () {
   }
   return 'frontend/dist/frontend/assets/public/videos/owasp_promo.mp4'
 }
+
+export default module.exports

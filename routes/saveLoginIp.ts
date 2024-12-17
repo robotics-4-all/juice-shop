@@ -40,3 +40,5 @@ module.exports = function saveLoginIp () {
     }
   }
 }
+
+export default module.exports

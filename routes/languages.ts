@@ -72,3 +72,5 @@ module.exports = function getLanguageList () { // TODO Refactor and extend to al
     }
   }
 }
+
+export default module.exports

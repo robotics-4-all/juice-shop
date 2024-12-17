@@ -82,3 +82,5 @@ export const getBlueprint = (): string | null => {
   }
   return null
 }
+
+export default module.exports
