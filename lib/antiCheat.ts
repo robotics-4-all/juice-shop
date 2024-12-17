@@ -14,6 +14,7 @@ import { type NextFunction, type Request, type Response } from 'express'
 import * as utils from './utils'
 // @ts-expect-error FIXME due to non-existing type definitions for median
 import median from 'median'
+import { ChallengeModel } from '../models/challenge'
 
 const coupledChallenges = { // TODO prevent also near-identical challenges (e.g. all null byte file access or dom xss + bonus payload etc.) from counting as cheating
   loginAdminChallenge: ['weakPasswordChallenge'],
@@ -24,9 +25,26 @@ const coupledChallenges = { // TODO prevent also near-identical challenges (e.g.
 }
 const trivialChallenges = ['errorHandlingChallenge', 'privacyPolicyChallenge', 'closeNotificationsChallenge']
 
-const solves: Array<{ challenge: any, phase: string, timestamp: Date, cheatScore: number }> = [{ challenge: {}, phase: 'server start', timestamp: new Date(), cheatScore: 0 }] // seed with server start timestamp
+const mockChallenge = {
+    id: 0,
+    name: '',
+    category: '',
+    description: '',
+    difficulty: 0,
+    hint: null,
+    hintUrl: null,
+    mitigationUrl: null,
+    key: '',
+    disabledEnv: null,
+    tutorialOrder: null,
+    tags: '',
+    solved: false,
+    codingChallengeStatus: 0
+}
 
-const preSolveInteractions: Array<{ challengeKey: any, urlFragments: string[], interactions: boolean[] }> = [
+const solves: Array<{ challenge: any, phase: string, timestamp: Date, cheatScore: number }> = [{ challenge: mockChallenge, phase: 'server start', timestamp: new Date(), cheatScore: 0 }] // seed with server start timestamp
+
+const preSolveInteractions: Array<{ challengeKey: string, urlFragments: string[], interactions: boolean[] }> = [
   { challengeKey: 'missingEncodingChallenge', urlFragments: ['/assets/public/images/uploads/%F0%9F%98%BC-'], interactions: [false] },
   { challengeKey: 'directoryListingChallenge', urlFragments: ['/ftp'], interactions: [false] },
   { challengeKey: 'easterEggLevelOneChallenge', urlFragments: ['/ftp', '/ftp/eastere.gg'], interactions: [false, false] },
