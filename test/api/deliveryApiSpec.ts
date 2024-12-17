@@ -12,7 +12,6 @@ const REST_URL = "http://localhost:3000/rest";
 
 const jsonHeader = { "content-type": "application/json" };
 let authHeader: { Authorization: string; "content-type": string };
-
 const loginAndGetAuthHeader = async (email: string, password: string) => {
   return frisby
     .post(REST_URL + "/user/login", {
