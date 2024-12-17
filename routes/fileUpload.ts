@@ -4,16 +4,15 @@
  */
 
 import os from 'os'
-import fs = require('fs')
-import challengeUtils = require('../lib/challengeUtils')
+import fs from 'fs'
+import * as challengeUtils from '../lib/challengeUtils'
 import { type NextFunction, type Request, type Response } from 'express'
 import path from 'path'
 import * as utils from '../lib/utils'
 import { challenges } from '../data/datacache'
-
-const libxml = require('libxmljs')
-const vm = require('vm')
-const unzipper = require('unzipper')
+import libxml from 'libxmljs'
+import vm from 'vm'
+import unzipper from 'unzipper'
 
 function ensureFileIsPassed ({ file }: Request, res: Response, next: NextFunction) {
   if (file != null) {
@@ -34,7 +33,7 @@ function handleZipFileUpload ({ file }: Request, res: Response, next: NextFuncti
           fs.close(fd, function () {
             fs.createReadStream(tempFile)
               .pipe(unzipper.Parse())
-              .on('entry', function (entry: any) {
+              .on('entry', function (entry: unzipper.Entry) {
                 const fileName = entry.path
                 const absolutePath = path.resolve('uploads/complaints/' + fileName)
                 challengeUtils.solveIf(challenges.fileWriteChallenge, () => { return absolutePath === path.resolve('ftp/legal.md') })
@@ -43,14 +42,14 @@ function handleZipFileUpload ({ file }: Request, res: Response, next: NextFuncti
                 } else {
                   entry.autodrain()
                 }
-              }).on('error', function (err: unknown) { next(err) })
+              })
+              .on('error', (err: Error) => { // TODO: Remove any
+                next(err)
+              })
           })
         })
       })
     }
-    res.status(204).end()
-  } else {
-    next()
   }
 }
 
@@ -102,10 +101,4 @@ function handleXmlUpload ({ file }: Request, res: Response, next: NextFunction) 
   res.status(204).end()
 }
 
-module.exports = {
-  ensureFileIsPassed,
-  handleZipFileUpload,
-  checkUploadSize,
-  checkFileType,
-  handleXmlUpload
-}
+export { ensureFileIsPassed, handleZipFileUpload, checkUploadSize, checkFileType, handleXmlUpload }
