@@ -2,6 +2,7 @@
  * Copyright (c) 2014-2024 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
+import * as jwt from 'jsonwebtoken';
 
 import { type ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 import { LastLoginIpComponent } from './last-login-ip.component'
@@ -12,6 +13,8 @@ describe('LastLoginIpComponent', () => {
   let component: LastLoginIpComponent
   let fixture: ComponentFixture<LastLoginIpComponent>
   let sanitizer
+
+  const secretKey = 'test-secret'; // Secret for JWT signing
 
   beforeEach(waitForAsync(() => {
     sanitizer = jasmine.createSpyObj('DomSanitizer', ['bypassSecurityTrustHtml', 'sanitize'])
@@ -46,15 +49,39 @@ describe('LastLoginIpComponent', () => {
     expect(console.log).toHaveBeenCalled()
   })
 
-  xit('should set Last-Login IP from JWT as trusted HTML', () => { // FIXME Expected state seems to leak over from previous test case occasionally
-    localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7Imxhc3RMb2dpbklwIjoiMS4yLjMuNCJ9fQ.RAkmdqwNypuOxv3SDjPO4xMKvd1CddKvDFYDBfUt3bg')
-    component.ngOnInit()
-    expect(sanitizer.bypassSecurityTrustHtml).toHaveBeenCalledWith('<small>1.2.3.4</small>')
-  })
+  xit('should set Last-Login IP from JWT as trusted HTML', () => {
+    // Generate JWT with "lastLoginIp"
+    const token = jwt.sign(
+      { data: { lastLoginIp: '1.2.3.4' } },
+      secretKey,
+      { algorithm: 'HS256' }
+    );
 
-  xit('should not set Last-Login IP if none is present in JWT', () => { // FIXME Expected state seems to leak over from previous test case occasionally
-    localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7fX0.bVBhvll6IaeR3aUdoOeyR8YZe2S2DfhGAxTGfd9enLw')
-    component.ngOnInit()
-    expect(sanitizer.bypassSecurityTrustHtml).not.toHaveBeenCalled()
-  })
+    // Set JWT in localStorage
+    localStorage.setItem('token', token);
+
+    // Trigger ngOnInit
+    component.ngOnInit();
+
+    // Assert that the sanitizer method was called with the correct HTML
+    expect(sanitizer.bypassSecurityTrustHtml).toHaveBeenCalledWith('<small>1.2.3.4</small>');
+  });
+
+  xit('should not set Last-Login IP if none is present in JWT', () => {
+    // Generate JWT without "lastLoginIp"
+    const token = jwt.sign(
+      { data: {} },
+      secretKey,
+      { algorithm: 'HS256' }
+    );
+
+    // Set JWT in localStorage
+    localStorage.setItem('token', token);
+
+    // Trigger ngOnInit
+    component.ngOnInit();
+
+    // Assert that the sanitizer method was not called
+    expect(sanitizer.bypassSecurityTrustHtml).not.toHaveBeenCalled();
+  });
 })

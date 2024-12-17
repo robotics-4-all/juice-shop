@@ -4,6 +4,24 @@
  */
 
 module.exports = {
+  parser: '@typescript-eslint/parser',
+  parserOptions: {
+    project: ['./tsconfig.json'], // Path to tsconfig.json
+    tsconfigRootDir: __dirname,   // Resolves the path correctly
+    ecmaVersion: 'latest',        // ECMAScript version
+    sourceType: 'module',
+  },
+  plugins: ['@typescript-eslint'],
+  extends: [
+    'plugin:@typescript-eslint/recommended',
+    'eslint:recommended',
+  ],
+  // ignorePatterns: ['dist/', 'node_modules/'], // Exclude build output and node_modules
+  // rules: {
+  //   '@typescript-eslint/dot-notation': 'error',
+  //   // Add other rules as needed
+  // },
+
   extends: 'standard-with-typescript',
   env: {
     browser: true,
@@ -39,5 +57,5 @@ module.exports = {
         '@typescript-eslint/no-var-requires': 'off'
       }
     }
-  ]
-}
+  ],
+};
