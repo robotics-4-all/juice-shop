@@ -19,6 +19,7 @@ import { TutorialUnavailableInstruction } from './tutorialUnavailable'
 import { CodingChallengesInstruction } from './challenges/codingChallenges'
 import { AdminSectionInstruction } from './challenges/adminSection'
 import { ReflectedXssInstruction } from './challenges/reflectedXss'
+import DOMPurify from 'dompurify'
 
 const challengeInstructions: ChallengeInstruction[] = [
   ScoreBoardInstruction,
@@ -108,7 +109,9 @@ function loadHint (hint: ChallengeHint): HTMLElement {
 
   const textBox = document.createElement('span')
   textBox.style.flexGrow = '2'
-  textBox.innerHTML = snarkdown(hint.text)
+  // textBox.innerHTML = snarkdown(hint.text)
+  const sanitizedHTML = DOMPurify.sanitize(snarkdown(hint.text));
+  textBox.innerHTML = sanitizedHTML;
 
   const cancelButton = document.createElement('button')
   cancelButton.id = 'cancelButton'
