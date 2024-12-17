@@ -135,15 +135,19 @@ function loadHint (hint: ChallengeHint): HTMLElement {
 
   wrapper.appendChild(relAnchor)
 
-  if (hint.fixtureAfter) {
-    // insertAfter does not exist so we simulate it this way
-    target.parentElement.insertBefore(wrapper, target.nextSibling)
+  if (target.parentElement) {
+    if (hint.fixtureAfter) {
+      // insertAfter does not exist so we simulate it this way
+      target.parentElement.insertBefore(wrapper, target.nextSibling)
+    } else {
+      target.parentElement.insertBefore(wrapper, target)
+    }
   } else {
-    target.parentElement.insertBefore(wrapper, target)
+    console.error('target.parentElement is null')
   }
-
+  
   return wrapper
-}
+  }
 
 async function waitForDoubleClick (element: HTMLElement) {
   return await new Promise((resolve) => {
@@ -182,7 +186,12 @@ export async function startHackingInstructorFor (challengeName: string): Promise
     if (!hint.unskippable) {
       continueConditions.push(waitForDoubleClick(element))
     }
-    continueConditions.push(waitForCancel(document.getElementById('cancelButton')))
+    const cancelButton = document.getElementById('cancelButton')
+    if (cancelButton) {
+      continueConditions.push(waitForCancel(cancelButton))
+    } else {
+      console.error('Cancel button not found')
+    }
 
     const command = await Promise.race(continueConditions)
     if (command === 'break') {
