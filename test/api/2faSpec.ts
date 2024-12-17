@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import frisby = require('frisby')
+import frisby, { FrisbyResponse } from 'frisby';
 import config from 'config'
 import jwt from 'jsonwebtoken'
 const Joi = frisby.Joi
@@ -15,6 +15,8 @@ const REST_URL = 'http://localhost:3000/rest'
 const API_URL = 'http://localhost:3000/api'
 
 const jsonHeader = { 'content-type': 'application/json' }
+const password = '123456'
+const secret = 'ASDVAJSDUASZGDIADBJS'
 
 async function login ({ email, password, totpSecret }: { email: string, password: string, totpSecret?: string }) {
   // @ts-expect-error FIXME promise return handling broken
@@ -225,34 +227,60 @@ describe('/rest/2fa/status', () => {
   })
 })
 
+async function setupTestAccount(email: string, password: string) {
+  await register({ email, password })
+  const { token } = await login({ email, password })
+  return token
+}
+
+function postRequest(
+  url: string,
+  options: any
+): Promise<FrisbyResponse> {
+  return new Promise((resolve, reject) => {
+    frisby
+      .post(url, options)
+      .then(resolve)
+      .catch(reject);
+  });
+}
+
+function post2FASetup(
+  token: string,
+  password: string,
+  secret: string,
+  type: string = 'totp_setup_secret',
+  initialToken?: string
+) {
+  return frisby.post(`${REST_URL}/2fa/setup`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'content-type': 'application/json'
+    },
+    body: {
+      password,
+      setupToken: security.authorize({
+        secret,
+        type
+      }),
+      initialToken: initialToken || otplib.authenticator.generate(secret)
+    }
+  });
+}
+
 describe('/rest/2fa/setup', () => {
   it('POST should be able to setup 2fa for accounts without 2fa enabled', async () => {
     const email = 'fooooo1@bar.com'
-    const password = '123456'
 
-    const secret = 'ASDVAJSDUASZGDIADBJS'
+    const token = await setupTestAccount(email, password)
 
-    await register({ email, password })
-    const { token } = await login({ email, password })
-
-    // @ts-expect-error FIXME promise return handling broken
-    await frisby.post(
-      REST_URL + '/2fa/setup',
-      {
-        headers: {
-          Authorization: 'Bearer ' + token,
-          'content-type': 'application/json'
-        },
-        body: {
-          password,
-          setupToken: security.authorize({
-            secret,
-            type: 'totp_setup_secret'
-          }),
-          initialToken: otplib.authenticator.generate(secret)
-        }
-      })
-      .expect('status', 200)
+    const response =  post2FASetup(
+      token,
+      password,
+      secret
+    );
+  
+    response.expect('status', 200);
 
     // @ts-expect-error FIXME promise return handling broken
     await frisby.get(
@@ -274,41 +302,22 @@ describe('/rest/2fa/setup', () => {
 
   it('POST should fail if the password doesnt match', async () => {
     const email = 'fooooo2@bar.com'
-    const password = '123456'
 
-    const secret = 'ASDVAJSDUASZGDIADBJS'
+    const token = await setupTestAccount(email, password)
 
-    await register({ email, password })
-    const { token } = await login({ email, password })
-
-    // @ts-expect-error FIXME promise return handling broken
-    await frisby.post(
-      REST_URL + '/2fa/setup',
-      {
-        headers: {
-          Authorization: 'Bearer ' + token,
-          'content-type': 'application/json'
-        },
-        body: {
-          password: password + ' this makes the password wrong',
-          setupToken: security.authorize({
-            secret,
-            type: 'totp_setup_secret'
-          }),
-          initialToken: otplib.authenticator.generate(secret)
-        }
-      })
-      .expect('status', 401)
-  })
+    return setupTestAccount(email, password).then((token) => {
+      return post2FASetup(
+        token,
+        password + ' this makes the password wrong', // Incorrect password
+        secret
+      ).expect('status', 401);
+    });
+  });
 
   it('POST should fail if the inital token is incorrect', async () => {
     const email = 'fooooo3@bar.com'
-    const password = '123456'
 
-    const secret = 'ASDVAJSDUASZGDIADBJS'
-
-    await register({ email, password })
-    const { token } = await login({ email, password })
+    const token = await setupTestAccount(email, password)
 
     // @ts-expect-error FIXME promise return handling broken
     await frisby.post(
@@ -332,31 +341,16 @@ describe('/rest/2fa/setup', () => {
 
   it('POST should fail if the token is of the wrong type', async () => {
     const email = 'fooooo4@bar.com'
-    const password = '123456'
 
-    const secret = 'ASDVAJSDUASZGDIADBJS'
-
-    await register({ email, password })
-    const { token } = await login({ email, password })
+    const token = await setupTestAccount(email, password)
 
     // @ts-expect-error FIXME promise return handling broken
-    await frisby.post(
-      REST_URL + '/2fa/setup',
-      {
-        headers: {
-          Authorization: 'Bearer ' + token,
-          'content-type': 'application/json'
-        },
-        body: {
-          password,
-          setupToken: security.authorize({
-            secret,
-            type: 'totp_setup_secret_foobar'
-          }),
-          initialToken: otplib.authenticator.generate(secret)
-        }
-      })
-      .expect('status', 401)
+    await post2FASetup(
+      token,
+      password,
+      secret,
+      'totp_setup_secret_foobar' // Wrong token type
+    ).expect('status', 401);
   })
 
   it('POST should fail if the account has already set up 2fa', async () => {
@@ -390,7 +384,6 @@ describe('/rest/2fa/setup', () => {
 describe('/rest/2fa/disable', () => {
   it('POST should be able to disable 2fa for account with 2fa enabled', async () => {
     const email = 'fooooodisable1@bar.com'
-    const password = '123456'
     const totpSecret = 'ASDVAJSDUASZGDIADBJS'
 
     await register({ email, password, totpSecret })
@@ -427,7 +420,6 @@ describe('/rest/2fa/disable', () => {
 
   it('POST should not be possible to disable 2fa without the correct password', async () => {
     const email = 'fooooodisable1@bar.com'
-    const password = '123456'
     const totpSecret = 'ASDVAJSDUASZGDIADBJS'
 
     await register({ email, password, totpSecret })
