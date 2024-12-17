@@ -127,7 +127,7 @@ export const downloadToFile = async (url: string, dest: string) => {
   }
 }
 
-export const jwtFrom = ({ headers }: { headers: any }) => {
+export const jwtFrom = ({ headers }: { headers: { authorization?: string } }) => {
   if (headers?.authorization) {
     const parts = headers.authorization.split(' ')
     if (parts.length === 2) {
@@ -139,7 +139,7 @@ export const jwtFrom = ({ headers }: { headers: any }) => {
       }
     }
   }
-  return undefined
+  return null
 }
 
 export const randomHexString = (length: number): string => {
@@ -196,11 +196,11 @@ export function isChallengeEnabled (challenge: Challenge): boolean {
 
 export const parseJsonCustom = (jsonString: string) => {
   const parser = clarinet.parser()
-  const result: any[] = []
-  parser.onkey = parser.onopenobject = (k: any) => {
+  const result: { key: string, value: string | number | boolean | null }[] = [] // Replace 'any' with specific types
+  parser.onkey = parser.onopenobject = (k: string) => { // Replace 'any' with 'string'
     result.push({ key: k, value: null })
   }
-  parser.onvalue = (v: any) => {
+  parser.onvalue = (v: string | number | boolean | null) => { // Replace 'any' with specific types
     result[result.length - 1].value = v
   }
   parser.write(jsonString)
@@ -232,7 +232,7 @@ export const matchesEtcPasswdFile = (text: string) => {
   const match = text.match(/(\w*:\w*:\d*:\d*:\w*:.*)|(Note that this file is consulted directly)/gi)
   return match !== null && match.length >= 1
 }
-
-export function generateCoupon(discount: number): any {
+export function generateCoupon(discount: number): string {
   throw new Error('Function not implemented.')
 }
+
