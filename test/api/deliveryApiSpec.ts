@@ -31,12 +31,10 @@ const loginAndGetAuthHeader = async (email: string, password: string) => {
 describe("/api/Deliverys", () => {
   let authHeader: any;
 
-  // Helper function to log in and set authHeader
   const loginAndSetAuthHeader = async (email: string, password: string) => {
     authHeader = await loginAndGetAuthHeader(email, password);
   };
 
-  // Helper function to test GET /Deliverys
   const testDeliveryMethods = (expectedPrice: number) => {
     return frisby
       .get(API_URL + "/Deliverys", { headers: authHeader })
@@ -79,12 +77,10 @@ describe("/api/Deliverys", () => {
 describe("/api/Deliverys/:id", () => {
   let authHeader: any;
 
-  // Helper function to log in and set authHeader
   const loginAndSetAuthHeader = async (email: string, password: string) => {
     authHeader = await loginAndGetAuthHeader(email, password);
   };
 
-  // Helper function to test GET /Deliverys/:id
   const testDeliveryMethodById = (expectedPrice: number) => {
     return frisby
       .get(API_URL + "/Deliverys/2", { headers: authHeader })
