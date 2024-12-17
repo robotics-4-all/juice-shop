@@ -66,9 +66,7 @@ export const verifyPassword = (password: string, hash: string): boolean => {
   return crypto.timingSafeEqual(Buffer.from(password), Buffer.from(hash))
 }
 
-export const generateCoupon = (discount: number): string => {
-  return utils.generateCoupon(discount)
-}
+// Removed duplicate generateCoupon function
 
 interface ProductConfig {
   blueprint?: string
@@ -83,4 +81,12 @@ export const getBlueprint = (): string | null => {
   return null
 }
 
+export const generateCoupon = (discount: number): string => {
+  const couponCode = `DISCOUNT-${discount}-${Date.now()}`
+  return couponCode
+}
+ 
+
+
 export default module.exports
+
