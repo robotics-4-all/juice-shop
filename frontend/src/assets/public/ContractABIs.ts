@@ -761,7 +761,6 @@ export const contractABI = [
   },
 ];
 
-
 export const BeeTokenABI = contractABI; // Reuse the same ABI as it is identical
 
 export const BeeFaucetABI = [
