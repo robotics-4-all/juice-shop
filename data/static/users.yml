@@ -147,7 +147,7 @@
   email: wurstbrot
   username: wurstbrot
   password: 'EinBelegtesBrotMitSchinkenSCHINKEN!'
-  totpSecret: ${TOTP_SECRET}
+  totpSecret: TOTP_SECRET
   key: timo
   role: 'admin'
   securityQuestion:
