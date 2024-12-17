@@ -21,12 +21,16 @@ interface VerdictRequestBody {
   key: string
 }
 
-const setStatusCode = (error: any) => {
-  switch (error.name) {
-    case 'BrokenBoundary':
-      return 422
-    default:
-      return 200
+const setStatusCode = (error: unknown) => {
+  if (error instanceof Error) {
+    switch (error.name) {
+      case 'BrokenBoundary':
+        return 422
+      default:
+        return 200
+    }
+  } else {
+    return 500
   }
 }
 
