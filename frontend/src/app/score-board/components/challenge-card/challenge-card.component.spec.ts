@@ -7,15 +7,6 @@ import { MatIconModule } from '@angular/material/icon'
 import { MatTooltipModule } from '@angular/material/tooltip'
 import { EnrichedChallenge } from '../../types/EnrichedChallenge'
 
-interface Challenge {
-  category: string
-  name: string
-  mitigationUrl: string
-  hasCodingChallenge: boolean
-  description: string
-  tagList: string[]
-  solved?: boolean
-}
 
 describe('ChallengeCard', () => {
   let component: ChallengeCardComponent
