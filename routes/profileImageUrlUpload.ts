@@ -12,7 +12,7 @@ import * as utils from '../lib/utils'
 const security = require('../lib/insecurity')
 const request = require('request')
 
-module.exports = function profileImageUrlUpload () {
+export default function profileImageUrlUpload () {
   return (req: Request, res: Response, next: NextFunction) => {
     if (req.body.imageUrl !== undefined) {
       const url = req.body.imageUrl

@@ -25,8 +25,8 @@ global.sleep = (time: number) => {
   }
 }
 
-module.exports = function productReviews () {
-  return (req: Request, res: Response, next: NextFunction) => {
+export default function productReviews () {
+  return (req: Request, res: Response) => {
     const id = !utils.isChallengeEnabled(challenges.noSqlCommandChallenge) ? Number(req.params.id) : req.params.id
 
     // Measure how long the query takes, to check if there was a nosql dos attack

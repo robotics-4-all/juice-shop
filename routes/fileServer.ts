@@ -11,8 +11,8 @@ import challengeUtils = require('../lib/challengeUtils')
 import * as utils from '../lib/utils'
 const security = require('../lib/insecurity')
 
-module.exports = function servePublicFiles () {
-  return ({ params, query }: Request, res: Response, next: NextFunction) => {
+export default function servePublicFiles () {
+  return ({ params }: Request, res: Response, next: NextFunction) => {
     const file = params.file
 
     if (!file.includes('/')) {
