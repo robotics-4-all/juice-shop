@@ -3,26 +3,35 @@
  * SPDX-License-Identifier: MIT
  */
 
-import io from 'socket.io-client'
+// import io from 'socket.io-client'
+import { setupSocket, teardownSocket, socket } from './SocketHelperfn'
 
 describe('WebSocket', () => {
-  let socket: SocketIOClient.Socket
+  // let socket: SocketIOClient.Socket
+
+  // beforeEach(done => {
+  //   socket = io('http://localhost:3000', {
+  //     reconnectionDelay: 0,
+  //     forceNew: true
+  //   })
+  //   socket.on('connect', () => {
+  //     done()
+  //   })
+  // })
+
+  // afterEach(done => {
+  //   if (socket.connected) {
+  //     socket.disconnect()
+  //   }
+  //   done()
+  // })
 
   beforeEach(done => {
-    socket = io('http://localhost:3000', {
-      reconnectionDelay: 0,
-      forceNew: true
-    })
-    socket.on('connect', () => {
-      done()
-    })
+    setupSocket(done)
   })
 
   afterEach(done => {
-    if (socket.connected) {
-      socket.disconnect()
-    }
-    done()
+    teardownSocket(done)
   })
 
   it('server handles confirmation messages for emitted challenge resolutions', done => {

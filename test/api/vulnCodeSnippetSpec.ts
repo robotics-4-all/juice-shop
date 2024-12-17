@@ -5,7 +5,8 @@
 
 import { expect } from '@jest/globals'
 import frisby = require('frisby')
-import io from 'socket.io-client'
+import { setupSocket, teardownSocket, socket } from './SocketHelperfn'
+// import io from 'socket.io-client'
 const Joi = frisby.Joi
 
 const URL = 'http://localhost:3000'
@@ -34,23 +35,30 @@ describe('/snippets/:challenge', () => {
 })
 
 describe('snippets/verdict', () => {
-  let socket: SocketIOClient.Socket
+  // let socket: SocketIOClient.Socket
 
+  // beforeEach(done => {
+  //   socket = io('http://localhost:3000', {
+  //     reconnectionDelay: 0,
+  //     forceNew: true
+  //   })
+  //   socket.on('connect', () => {
+  //     done()
+  //   })
+  // })
+
+  // afterEach(done => {
+  //   if (socket.connected) {
+  //     socket.disconnect()
+  //   }
+  //   done()
+  // })
   beforeEach(done => {
-    socket = io('http://localhost:3000', {
-      reconnectionDelay: 0,
-      forceNew: true
-    })
-    socket.on('connect', () => {
-      done()
-    })
+    setupSocket(done)
   })
 
   afterEach(done => {
-    if (socket.connected) {
-      socket.disconnect()
-    }
-    done()
+    teardownSocket(done)
   })
 
   it('should check for the incorrect lines', () => {
