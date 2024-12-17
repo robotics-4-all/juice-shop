@@ -6,11 +6,12 @@
 import sinon = require('sinon')
 import chai = require('chai')
 import sinonChai = require('sinon-chai')
+import { retrieveAppConfiguration } from '../../routes/appConfiguration'
 const expect = chai.expect
 chai.use(sinonChai)
 
 describe('appConfiguration', () => {
-  const retrieveAppConfiguration = require('../../routes/appConfiguration')
+  
   let req: any
   let res: any
 
