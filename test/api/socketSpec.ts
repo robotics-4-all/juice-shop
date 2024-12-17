@@ -7,25 +7,6 @@
 import { setupSocket, teardownSocket, socket } from './SocketHelperfn'
 
 describe('WebSocket', () => {
-  // let socket: SocketIOClient.Socket
-
-  // beforeEach(done => {
-  //   socket = io('http://localhost:3000', {
-  //     reconnectionDelay: 0,
-  //     forceNew: true
-  //   })
-  //   socket.on('connect', () => {
-  //     done()
-  //   })
-  // })
-
-  // afterEach(done => {
-  //   if (socket.connected) {
-  //     socket.disconnect()
-  //   }
-  //   done()
-  // })
-
   beforeEach(done => {
     setupSocket(done)
   })
