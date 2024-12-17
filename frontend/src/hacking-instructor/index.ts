@@ -19,6 +19,7 @@ import { TutorialUnavailableInstruction } from './tutorialUnavailable'
 import { CodingChallengesInstruction } from './challenges/codingChallenges'
 import { AdminSectionInstruction } from './challenges/adminSection'
 import { ReflectedXssInstruction } from './challenges/reflectedXss'
+import DOMPurify from 'dompurify'
 
 const challengeInstructions: ChallengeInstruction[] = [
   ScoreBoardInstruction,
@@ -108,7 +109,8 @@ function loadHint (hint: ChallengeHint): HTMLElement {
 
   const textBox = document.createElement('span')
   textBox.style.flexGrow = '2'
-  textBox.innerHTML = snarkdown(hint.text)
+  // textBox.innerHTML = snarkdown(hint.text)
+  textBox.innerHTML = DOMPurify.sanitize(snarkdown(hint.text))
 
   const cancelButton = document.createElement('button')
   cancelButton.id = 'cancelButton'
@@ -137,9 +139,11 @@ function loadHint (hint: ChallengeHint): HTMLElement {
 
   if (hint.fixtureAfter) {
     // insertAfter does not exist so we simulate it this way
-    target.parentElement.insertBefore(wrapper, target.nextSibling)
+    target.parentElement?.insertBefore(wrapper, target.nextSibling)
   } else {
-    target.parentElement.insertBefore(wrapper, target)
+    if (target.parentElement) {
+      target.parentElement.insertBefore(wrapper, target)
+    }
   }
 
   return wrapper
@@ -182,7 +186,10 @@ export async function startHackingInstructorFor (challengeName: string): Promise
     if (!hint.unskippable) {
       continueConditions.push(waitForDoubleClick(element))
     }
-    continueConditions.push(waitForCancel(document.getElementById('cancelButton')))
+    const cancelButton = document.getElementById('cancelButton')
+    if (cancelButton) {
+      continueConditions.push(waitForCancel(cancelButton))
+    }
 
     const command = await Promise.race(continueConditions)
     if (command === 'break') {

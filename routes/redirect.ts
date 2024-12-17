@@ -31,3 +31,5 @@ function isUnintendedRedirect (toUrl: string) {
   }
   return unintended
 }
+
+export default module.exports

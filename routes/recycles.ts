@@ -24,3 +24,4 @@ exports.blockRecycleItems = () => (req: Request, res: Response) => {
   const errMsg = { err: 'Sorry, this endpoint is not supported.' }
   return res.send(utils.queryResultToJson(errMsg))
 }
+export default module.exports

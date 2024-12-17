@@ -80,8 +80,13 @@ export const getBlueprint = (): string | null => {
   }
   return null
 }
+
 export const generateCoupon = (discount: number): string => {
   const couponCode = `DISCOUNT-${discount}-${Date.now()}`
   return couponCode
 }
  
+
+
+export default module.exports
+

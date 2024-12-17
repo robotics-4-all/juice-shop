@@ -180,3 +180,5 @@ module.exports.disable = () => disable
 module.exports.verify = () => verify
 module.exports.status = () => status
 module.exports.setup = () => setup
+
+export default module.exports

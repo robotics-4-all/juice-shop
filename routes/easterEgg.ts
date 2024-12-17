@@ -15,3 +15,5 @@ module.exports = function serveEasterEgg () {
     res.sendFile(path.resolve('frontend/dist/frontend/assets/private/threejs-demo.html'))
   }
 }
+
+export default module.exports
