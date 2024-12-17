@@ -5,8 +5,8 @@
 
 import { expect } from '@jest/globals'
 import frisby = require('frisby')
-import io from 'socket.io-client'
 import { Joi } from 'frisby'
+import { setupSocket, teardownSocket } from './socketSetupFunction';
 
 const URL = 'http://localhost:3000'
 
@@ -30,24 +30,23 @@ describe('/snippets/fixes/:key', () => {
 })
 
 describe('/snippets/fixes', () => {
-  let socket: SocketIOClient.Socket
+  let socket: SocketIOClient.Socket;
 
-  beforeEach(done => {
-    socket = io('http://localhost:3000', {
-      reconnectionDelay: 0,
-      forceNew: true
-    })
-    socket.on('connect', () => {
-      done()
-    })
-  })
+  beforeEach((done) => {
+      socket = setupSocket(done);
+    });
 
-  afterEach(done => {
-    if (socket.connected) {
-      socket.disconnect()
-    }
-    done()
-  })
+  afterEach((done) => {
+      teardownSocket(socket, done);
+  });
+
+  it('POST fix for non-existing challenge key throws error', () => {
+      return frisby.post(URL + '/snippets/fixes', {
+          body: {
+              // test body
+          }
+      })
+      })
 
   it('POST fix for non-existing challenge key throws error', () => {
     return frisby.post(URL + '/snippets/fixes', {
