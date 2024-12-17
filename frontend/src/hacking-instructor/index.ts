@@ -20,6 +20,15 @@ import { CodingChallengesInstruction } from './challenges/codingChallenges'
 import { AdminSectionInstruction } from './challenges/adminSection'
 import { ReflectedXssInstruction } from './challenges/reflectedXss'
 import DOMPurify from 'dompurify'
+import MarkdownIt from 'markdown-it'
+import { link } from 'fs'
+
+const md = new MarkdownIt({
+  html: false, // don't allow html tags
+  linkify: true, // autoconvert URL-like text to links
+  typographer: true // enable some language-neutral replacement + quotes beautification
+})
+
 
 const challengeInstructions: ChallengeInstruction[] = [
   ScoreBoardInstruction,
@@ -110,7 +119,20 @@ function loadHint (hint: ChallengeHint): HTMLElement {
   const textBox = document.createElement('span')
   textBox.style.flexGrow = '2'
   // textBox.innerHTML = snarkdown(hint.text)
-  textBox.innerHTML = DOMPurify.sanitize(snarkdown(hint.text))
+  // textBox.innerHTML = DOMPurify.sanitize(snarkdown(hint.text))
+  const markdownContent = hint.text
+  const htmlContent = md.render(markdownContent)
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(htmlContent, 'text/html')
+  
+  // Clear any existing content in textBox
+  textBox.textContent = ''
+
+  // Safely append parsed nodes to textBox
+  doc.body.childNodes.forEach(node => {
+    textBox.appendChild(node)
+  })
+  
 
   const cancelButton = document.createElement('button')
   cancelButton.id = 'cancelButton'
