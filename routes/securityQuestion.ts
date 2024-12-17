@@ -31,3 +31,5 @@ module.exports = function securityQuestion () {
     })
   }
 }
+
+export default module.exports

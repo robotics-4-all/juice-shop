@@ -38,22 +38,87 @@ import customizeApplication from './lib/startup/customizeApplication'
 import customizeEasterEgg from './lib/startup/customizeEasterEgg' // vuln-code-snippet hide-line
 
 import authenticatedUsers from './routes/authenticatedUsers'
+import express from 'express'
+import compression from 'compression'
+import helmet from 'helmet'
+import featurePolicy from 'feature-policy'
+import errorhandler from 'errorhandler'
+import cookieParser from 'cookie-parser'
+import serveIndex from 'serve-index'
+import bodyParser from 'body-parser'
+import cors from 'cors'
+import basket from './routes/basket'
+import profileImageFileUpload from './routes/profileImageFileUpload'
+import profileImageUrlUpload from './routes/profileImageUrlUpload'
+import yaml from 'js-yaml'
+import swaggerUi from 'swagger-ui-express'
+import redirect from './routes/redirect'
+import vulnCodeSnippet from './routes/vulnCodeSnippet'
+import vulnCodeFixes from './routes/vulnCodeFixes'
+import angular from './routes/angular'
+import easterEgg from './routes/easterEgg'
+import premiumReward from './routes/premiumReward'
+import privacyPolicyProof from './routes/privacyPolicyProof'
+import appVersion from './routes/appVersion'
+import repeatNotification from './routes/repeatNotification'
+import continueCode from './routes/continueCode'
+import restoreProgress from './routes/restoreProgress'
+import fileServer from './routes/fileServer'
+import quarantineServer from './routes/quarantineServer'
+import keyServer from './routes/keyServer'
+import logFileServer from './routes/logfileServer'
+import metrics from './routes/metrics'
+import currentUser from './routes/currentUser'
+import login from './routes/login'
+import changePassword from './routes/changePassword'
+import resetPassword from './routes/resetPassword'
+import securityQuestion from './routes/securityQuestion'
+import search from './routes/search'
+import coupon from './routes/coupon'
+import order from './routes/order'
+import verify from './routes/verify'
+import recycles from './routes/recycles'
+import b2bOrder from './routes/b2bOrder'
+import showProductReviews from './routes/showProductReviews'
+import createProductReviews from './routes/createProductReviews'
+import checkKeys from './routes/checkKeys'
+import nftMint from './routes/nftMint'
+import web3Wallet from './routes/web3Wallet'
+import updateProductReviews from './routes/updateProductReviews'
+import likeProductReviews from './routes/likeProductReviews'
+import security from './lib/insecurity'
+
+import appConfiguration from './routes/appConfiguration'
+import captcha from './routes/captcha'
+import trackOrder from './routes/trackOrder'
+import countryMapping from './routes/countryMapping'
+import basketItems from './routes/basketItems'
+import saveLoginIp from './routes/saveLoginIp'
+import userProfile from './routes/userProfile'
+import updateUserProfile from './routes/updateUserProfile'
+import videoHandler from './routes/videoHandler'
+import twoFactorAuth from './routes/2fa'
+import languageList from './routes/languages'
+import imageCaptcha from './routes/imageCaptcha'
+import dataExport from './routes/dataExport'
+import address from './routes/address'
+import payment from './routes/payment'
+import wallet from './routes/wallet'
+import orderHistory from './routes/orderHistory'
+import delivery from './routes/delivery'
+import deluxe from './routes/deluxe'
+import memory from './routes/memory'
+import chatbot from './routes/chatbot'
+import locales from './data/static/locales.json'
+import i18n from 'i18n'
+import antiCheat from './lib/antiCheat'
 
 const startTime = Date.now()
 const finale = require('finale-rest')
-const express = require('express')
-const compression = require('compression')
-const helmet = require('helmet')
-const featurePolicy = require('feature-policy')
-const errorhandler = require('errorhandler')
-const cookieParser = require('cookie-parser')
-const serveIndex = require('serve-index')
-const bodyParser = require('body-parser')
-const cors = require('cors')
+
 const securityTxt = require('express-security.txt')
 const robots = require('express-robots-txt')
-const yaml = require('js-yaml')
-const swaggerUi = require('swagger-ui-express')
+
 const RateLimit = require('express-rate-limit')
 const ipfilter = require('express-ipfilter').IpFilter
 const swaggerDocument = yaml.load(fs.readFileSync('./swagger.yml', 'utf8'))
@@ -64,70 +129,9 @@ const {
   checkFileType,
   handleXmlUpload
 } = require('./routes/fileUpload')
-const profileImageFileUpload = require('./routes/profileImageFileUpload')
-const profileImageUrlUpload = require('./routes/profileImageUrlUpload')
-const redirect = require('./routes/redirect')
-const vulnCodeSnippet = require('./routes/vulnCodeSnippet')
-const vulnCodeFixes = require('./routes/vulnCodeFixes')
-const angular = require('./routes/angular')
-const easterEgg = require('./routes/easterEgg')
-const premiumReward = require('./routes/premiumReward')
-const privacyPolicyProof = require('./routes/privacyPolicyProof')
-const appVersion = require('./routes/appVersion')
-const repeatNotification = require('./routes/repeatNotification')
-const continueCode = require('./routes/continueCode')
-const restoreProgress = require('./routes/restoreProgress')
-const fileServer = require('./routes/fileServer')
-const quarantineServer = require('./routes/quarantineServer')
-const keyServer = require('./routes/keyServer')
-const logFileServer = require('./routes/logfileServer')
-const metrics = require('./routes/metrics')
-const currentUser = require('./routes/currentUser')
-const login = require('./routes/login')
-const changePassword = require('./routes/changePassword')
-const resetPassword = require('./routes/resetPassword')
-const securityQuestion = require('./routes/securityQuestion')
-const search = require('./routes/search')
-const coupon = require('./routes/coupon')
-const basket = require('./routes/basket')
-const order = require('./routes/order')
-const verify = require('./routes/verify')
-const recycles = require('./routes/recycles')
-const b2bOrder = require('./routes/b2bOrder')
-const showProductReviews = require('./routes/showProductReviews')
-const createProductReviews = require('./routes/createProductReviews')
-const checkKeys = require('./routes/checkKeys')
-const nftMint = require('./routes/nftMint')
-const web3Wallet = require('./routes/web3Wallet')
-const updateProductReviews = require('./routes/updateProductReviews')
-const likeProductReviews = require('./routes/likeProductReviews')
-const security = require('./lib/insecurity')
+
 const app = express()
 const server = require('http').Server(app)
-const appConfiguration = require('./routes/appConfiguration')
-const captcha = require('./routes/captcha')
-const trackOrder = require('./routes/trackOrder')
-const countryMapping = require('./routes/countryMapping')
-const basketItems = require('./routes/basketItems')
-const saveLoginIp = require('./routes/saveLoginIp')
-const userProfile = require('./routes/userProfile')
-const updateUserProfile = require('./routes/updateUserProfile')
-const videoHandler = require('./routes/videoHandler')
-const twoFactorAuth = require('./routes/2fa')
-const languageList = require('./routes/languages')
-const imageCaptcha = require('./routes/imageCaptcha')
-const dataExport = require('./routes/dataExport')
-const address = require('./routes/address')
-const payment = require('./routes/payment')
-const wallet = require('./routes/wallet')
-const orderHistory = require('./routes/orderHistory')
-const delivery = require('./routes/delivery')
-const deluxe = require('./routes/deluxe')
-const memory = require('./routes/memory')
-const chatbot = require('./routes/chatbot')
-const locales = require('./data/static/locales.json')
-const i18n = require('i18n')
-const antiCheat = require('./lib/antiCheat')
 
 const appName = config.get<string>('application.customMetricsPrefix')
 const startupGauge = new Prometheus.Gauge({
@@ -566,7 +570,7 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   app.post('/rest/user/reset-password', resetPassword())
   app.get('/rest/user/security-question', securityQuestion())
   app.get('/rest/user/whoami', security.updateAuthenticatedUsers(), currentUser())
-  app.get('/rest/user/authentication-details', authenticatedUsers())
+  app.get('/rest/user/authentication-details', (req, res, next) => { void authenticatedUsers()(req, res, next) })
   app.get('/rest/products/search', search())
   app.get('/rest/basket/:id', basket())
   app.post('/rest/basket/:id/checkout', order())
@@ -689,7 +693,7 @@ logger.info(`Entity models ${colors.bold(Object.keys(sequelize.models).length.to
 let metricsUpdateLoop: any
 const Metrics = metrics.observeMetrics() // vuln-code-snippet neutral-line exposedMetricsChallenge
 app.get('/metrics', metrics.serveMetrics()) // vuln-code-snippet vuln-line exposedMetricsChallenge
-errorhandler.title = `${config.get<string>('application.name')} (Express ${utils.version('express')})`
+logger.info(`${config.get<string>('application.name')} (Express ${utils.version('express')})`)
 
 export async function start (readyCallback?: () => void) {
   const datacreatorEnd = startupGauge.startTimer({ task: 'datacreator' })

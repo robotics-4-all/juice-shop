@@ -30,3 +30,5 @@ module.exports = function retrieveLoggedInUser () {
     }
   }
 }
+
+export default module.exports

@@ -51,6 +51,16 @@ module.exports = function productReviews() {
           }).catch(next);
         }
       }
+
     }).catch(next);
   };
 };
+
+    }, () => {
+      res.status(400).json({ error: 'Wrong Params' })
+    })
+  }
+}
+
+export default module.exports
+

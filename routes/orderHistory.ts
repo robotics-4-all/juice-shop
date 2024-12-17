@@ -37,3 +37,5 @@ module.exports.toggleDeliveryStatus = function toggleDeliveryStatus () {
     res.status(200).json({ status: 'success' })
   }
 }
+
+export default module.exports

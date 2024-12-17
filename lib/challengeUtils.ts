@@ -18,19 +18,38 @@ const globalWithSocketIO = global as typeof globalThis & {
   io: SocketIOClientStatic & Server
 }
 
-export const solveIf = function (challenge: any, criteria: () => any, isRestore: boolean = false) {
+interface Challenge {
+  key: string
+  name: string
+  description: string
+  difficulty: number
+  solved: boolean
+  save: () => Promise<Challenge>
+  id: number
+  category: string
+  hint: string
+  hintUrl: string
+  codingChallengeStatus: 0 | 1 | 2
+  // Add other properties as needed
+}
+
+export const solveIf = function (challenge: Challenge, criteria: () => boolean, isRestore: boolean = false) {
   if (notSolved(challenge) && criteria()) {
     solve(challenge, isRestore)
   }
 }
 
-export const solve = function (challenge: any, isRestore = false) {
+function notSolved(challenge: Challenge): boolean {
+  return !challenge.solved
+}
+
+export const solve = function (challenge: Challenge, isRestore = false) {
   challenge.solved = true
-  challenge.save().then((solvedChallenge: { difficulty: number, key: string, name: string }) => {
+  challenge.save().then((solvedChallenge: Challenge) => {
     logger.info(`${isRestore ? colors.grey('Restored') : colors.green('Solved')} ${solvedChallenge.difficulty}-star ${colors.cyan(solvedChallenge.key)} (${solvedChallenge.name})`)
     sendNotification(solvedChallenge, isRestore)
     if (!isRestore) {
-      const cheatScore = calculateCheatScore(challenge)
+      const cheatScore = calculateCheatScore(challenge as unknown as ChallengeModel)
       if (process.env.SOLUTIONS_WEBHOOK) {
         webhook.notify(solvedChallenge, cheatScore).catch((error: unknown) => {
           logger.error('Webhook notification failed: ' + colors.red(utils.getErrorMessage(error)))
@@ -40,7 +59,17 @@ export const solve = function (challenge: any, isRestore = false) {
   })
 }
 
-export const sendNotification = function (challenge: { difficulty?: number, key: any, name: any, description?: any }, isRestore: boolean) {
+function notifyChallenge(challenge: Challenge, isRestore: boolean) {
+  // Add logic to send notification
+}
+
+export const someOtherFunction = function (challenge: Challenge, data: string) {
+  if (notSolved(challenge)) {
+    // Add logic to handle some other function
+  }
+}
+
+export const sendNotification = function (challenge: Challenge, isRestore: boolean) {
   if (!notSolved(challenge)) {
     const flag = utils.ctfFlag(challenge.name)
     const notification = {
@@ -72,7 +101,6 @@ export const sendCodingChallengeNotification = function (challenge: { key: strin
   }
 }
 
-export const notSolved = (challenge: any) => challenge && !challenge.solved
 
 export const findChallengeByName = (challengeName: string) => {
   for (const c in challenges) {

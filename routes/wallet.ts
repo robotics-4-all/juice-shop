@@ -33,3 +33,5 @@ module.exports.addWalletBalance = function addWalletBalance () {
     }
   }
 }
+
+export default module.exports

@@ -98,3 +98,4 @@ async function quantityCheck (req: Request, res: Response, next: NextFunction, i
     res.status(400).json({ error: res.__('You can order only up to {{quantity}} items of this product.', { quantity: product.limitPerUser.toString() }) })
   }
 }
+export default module.exports

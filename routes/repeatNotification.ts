@@ -18,3 +18,5 @@ module.exports = function repeatNotification () {
     res.sendStatus(200)
   }
 }
+
+export default module.exports
