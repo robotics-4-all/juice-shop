@@ -203,7 +203,7 @@ export const status = function status () {
   }
 }
 
-module.exports.process = function respond () {
+export function respond () {
   return async (req: Request, res: Response, next: NextFunction) => {
     if (bot == null) {
       res.status(200).json({

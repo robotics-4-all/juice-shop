@@ -105,7 +105,7 @@ const likeProductReviews = require('./routes/likeProductReviews')
 const security = require('./lib/insecurity')
 const app = express()
 const server = require('http').Server(app)
-const appConfiguration = require('./routes/appConfiguration')
+import { retrieveAppConfiguration } from './routes/appConfiguration'
 const captcha = require('./routes/captcha')
 const trackOrder = require('./routes/trackOrder')
 const countryMapping = require('./routes/countryMapping')
@@ -115,17 +115,17 @@ const userProfile = require('./routes/userProfile')
 const updateUserProfile = require('./routes/updateUserProfile')
 const videoHandler = require('./routes/videoHandler')
 const twoFactorAuth = require('./routes/2fa')
-const languageList = require('./routes/languages')
-const imageCaptcha = require('./routes/imageCaptcha')
-const dataExport = require('./routes/dataExport')
+import { getLanguageList } from './routes/languages'
+import { imageCaptchas } from './routes/imageCaptcha'
+import { dataExport } from './routes/dataExport'
 const address = require('./routes/address')
-const payment = require('./routes/payment')
-const wallet = require('./routes/wallet')
-const orderHistory = require('./routes/orderHistory')
-const delivery = require('./routes/delivery')
+import * as payment from './routes/payment'
+import * as wallet from './routes/wallet'
+import * as orderHistory from './routes/orderHistory'
+import * as delivery from './routes/delivery'
 import { upgradeToDeluxe, deluxeMembershipStatus } from './routes/deluxe';
-import {addMemory, getMemories} from './routes/memory'
-const chatbot = require('./routes/chatbot')
+import { addMemory, getMemories } from './routes/memory'
+import * as chatbot from './routes/chatbot'
 const locales = require('./data/static/locales.json')
 const i18n = require('i18n')
 const antiCheat = require('./lib/antiCheat')
@@ -573,7 +573,7 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   app.post('/rest/basket/:id/checkout', order())
   app.put('/rest/basket/:id/coupon/:coupon', coupon())
   app.get('/rest/admin/application-version', appVersion())
-  app.get('/rest/admin/application-configuration', appConfiguration())
+  app.get('/rest/admin/application-configuration', retrieveAppConfiguration())
   app.get('/rest/repeat-notification', repeatNotification())
   app.get('/rest/continue-code', continueCode.continueCode())
   app.get('/rest/continue-code-findIt', continueCode.continueCodeFindIt())
@@ -583,13 +583,13 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   app.put('/rest/continue-code/apply/:continueCode', restoreProgress.restoreProgress())
   app.get('/rest/admin/application-version', appVersion())
   app.get('/rest/captcha', captcha())
-  app.get('/rest/image-captcha', imageCaptcha())
+  app.get('/rest/image-captcha', imageCaptchas())
   app.get('/rest/track-order/:id', trackOrder())
   app.get('/rest/country-mapping', countryMapping())
   app.get('/rest/saveLoginIp', saveLoginIp())
-  app.post('/rest/user/data-export', security.appendUserId(), imageCaptcha.verifyCaptcha())
+  app.post('/rest/user/data-export', security.appendUserId(), imageCaptchas.verifyCaptcha())
   app.post('/rest/user/data-export', security.appendUserId(), dataExport())
-  app.get('/rest/languages', languageList())
+  app.get('/rest/languages', getLanguageList())
   app.get('/rest/order-history', orderHistory.orderHistory())
   app.get('/rest/order-history/orders', security.isAccounting(), orderHistory.allOrders())
   app.put('/rest/order-history/:id/delivery-status', security.isAccounting(), orderHistory.toggleDeliveryStatus())
@@ -599,7 +599,7 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   app.post('/rest/deluxe-membership', security.appendUserId(), upgradeToDeluxe())
   app.get('/rest/memories', getMemories())
   app.get('/rest/chatbot/status', chatbot.status())
-  app.post('/rest/chatbot/respond', chatbot.process())
+  app.post('/rest/chatbot/respond', chatbot.respond())
   /* NoSQL API endpoints */
   app.get('/rest/products/:id/reviews', showProductReviews())
   app.put('/rest/products/:id/reviews', createProductReviews())

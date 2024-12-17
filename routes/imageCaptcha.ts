@@ -10,7 +10,7 @@ import { Op } from 'sequelize'
 const svgCaptcha = require('svg-captcha')
 const security = require('../lib/insecurity')
 
-function imageCaptchas () {
+export function imageCaptchas () {
   return (req: Request, res: Response) => {
     const captcha = svgCaptcha.create({ size: 5, noise: 2, color: true })
 
@@ -50,5 +50,3 @@ imageCaptchas.verifyCaptcha = () => (req: Request, res: Response, next: NextFunc
     res.status(401).send(res.__('Something went wrong while submitting CAPTCHA. Please try again.'))
   })
 }
-
-module.exports = imageCaptchas
