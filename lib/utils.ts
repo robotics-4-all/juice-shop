@@ -232,3 +232,7 @@ export const matchesEtcPasswdFile = (text: string) => {
   const match = text.match(/(\w*:\w*:\d*:\d*:\w*:.*)|(Note that this file is consulted directly)/gi)
   return match !== null && match.length >= 1
 }
+
+export function generateCoupon(discount: number): any {
+  throw new Error('Function not implemented.')
+}

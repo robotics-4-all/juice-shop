@@ -1,9 +1,8 @@
-import { defineConfig } from 'cypress'
-import * as security from './lib/insecurity'
-import config from 'config'
 import type { Memory as MemoryConfig, Product as ProductConfig } from './lib/config.types'
+import * as appConfig from 'config'
 import * as utils from './lib/utils'
 import * as otplib from 'otplib'
+import { defineConfig } from 'cypress'
 
 export default defineConfig({
   projectId: '3hrkhu',
@@ -14,14 +13,13 @@ export default defineConfig({
     downloadsFolder: 'test/cypress/downloads',
     fixturesFolder: false,
     supportFile: 'test/cypress/support/e2e.ts',
-    setupNodeEvents (on: any) {
-      on('before:browser:launch', (browser: any = {}, launchOptions: any) => { // TODO Remove after upgrade to Cypress >=12.5.0 <or> Chrome 119 become available on GitHub Workflows, see https://github.com/cypress-io/cypress-documentation/issues/5479
+    setupNodeEvents (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
+      on('before:browser:launch', (browser: Cypress.Browser, launchOptions: Cypress.BeforeBrowserLaunchOptions) => {
         if (browser.name === 'chrome' && browser.isHeadless) {
-          launchOptions.args = launchOptions.args.map((arg: any) => {
+          launchOptions.args = launchOptions.args.map((arg: string) => {
             if (arg === '--headless') {
               return '--headless=new'
             }
-
             return arg
           })
         }
@@ -30,10 +28,10 @@ export default defineConfig({
 
       on('task', {
         GenerateCoupon (discount: number) {
-          return security.generateCoupon(discount)
+          return utils.generateCoupon(discount)
         },
         GetBlueprint () {
-          for (const product of config.get<ProductConfig[]>('products')) {
+          for (const product of appConfig.get<ProductConfig[]>('products')) {
             if (product.fileForRetrieveBlueprintChallenge) {
               const blueprint = product.fileForRetrieveBlueprintChallenge
               return blueprint
@@ -41,13 +39,13 @@ export default defineConfig({
           }
         },
         GetChristmasProduct () {
-          return config.get<ProductConfig[]>('products').filter(
+          return appConfig.get<ProductConfig[]>('products').filter(
             (product) => product.useForChristmasSpecialChallenge
           )[0]
         },
         GetCouponIntent () {
           const trainingData = require(`data/chatbot/${utils.extractFilename(
-            config.get('application.chatBot.trainingData')
+            appConfig.get('application.chatBot.trainingData')
           )}`)
           const couponIntent = trainingData.data.filter(
             (data: { intent: string }) => data.intent === 'queries.couponCode'
@@ -55,25 +53,25 @@ export default defineConfig({
           return couponIntent
         },
         GetFromMemories (property: string) {
-          for (const memory of config.get<MemoryConfig[]>('memories') as any) {
+          for (const memory of appConfig.get<MemoryConfig[]>('memories') as any) {
             if (memory[property]) {
               return memory[property]
             }
           }
         },
         GetFromConfig (variable: string) {
-          return config.get(variable)
+          return appConfig.get(variable)
         },
         GetOverwriteUrl () {
-          return config.get('challenges.overwriteUrlForProductTamperingChallenge')
+          return appConfig.get('challenges.overwriteUrlForProductTamperingChallenge')
         },
         GetPastebinLeakProduct () {
-          return config.get<ProductConfig[]>('products').filter(
+          return appConfig.get<ProductConfig[]>('products').filter(
             (product) => product.keywordsForPastebinDataLeakChallenge
           )[0]
         },
         GetTamperingProductId () {
-          const products = config.get<ProductConfig[]>('products')
+          const products = appConfig.get<ProductConfig[]>('products')
           for (let i = 0; i < products.length; i++) {
             if (products[i].urlForProductTamperingChallenge) {
               return i + 1
@@ -97,3 +95,12 @@ export default defineConfig({
     }
   }
 })
+// utils.ts
+export function generateCoupon(discount: number): string {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let coupon = '';
+  for (let i = 0; i < 10; i++) {
+    coupon += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return `${coupon}-${discount}`;
+}
