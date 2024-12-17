@@ -12,7 +12,7 @@ import * as utils from '../lib/utils'
 import { challenges } from '../data/datacache'
 const security = require('../lib/insecurity')
 
-module.exports = function retrieveBasket () {
+export default function retrieveBasket () {
   return (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id
     BasketModel.findOne({ where: { id }, include: [{ model: ProductModel, paranoid: false, as: 'Products' }] })

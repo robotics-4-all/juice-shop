@@ -8,7 +8,7 @@ const web3WalletAddress = '0x413744D59d31AFDC2889aeE602636177805Bd7b0'
 const walletsConnected = new Set()
 let isEventListenerCreated = false
 
-module.exports.contractExploitListener = function contractExploitListener () {
+export const contractExploitListener = () => {
   return (req: Request, res: Response) => {
     const metamaskAddress = req.body.walletAddress
     walletsConnected.add(metamaskAddress)
@@ -30,3 +30,5 @@ module.exports.contractExploitListener = function contractExploitListener () {
     }
   }
 }
+
+export default { contractExploitListener }
