@@ -7,7 +7,6 @@ import { MatIconModule } from '@angular/material/icon'
 import { MatTooltipModule } from '@angular/material/tooltip'
 import { EnrichedChallenge } from '../../types/EnrichedChallenge'
 
-
 describe('ChallengeCard', () => {
   let component: ChallengeCardComponent
   let fixture: ComponentFixture<ChallengeCardComponent>
