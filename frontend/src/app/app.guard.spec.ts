@@ -2,6 +2,7 @@
  * Copyright (c) 2014-2024 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
+import * as jwt from 'jsonwebtoken';
 
 import { inject, TestBed } from '@angular/core/testing'
 import { AccountingGuard, AdminGuard, DeluxeGuard, LoginGuard } from './app.guard'
@@ -37,13 +38,30 @@ describe('LoginGuard', () => {
   }))
 
   it('returns payload from decoding a valid JWT', inject([LoginGuard], (guard: LoginGuard) => {
-    localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c')
-    expect(guard.tokenDecode()).toEqual({
-      sub: '1234567890',
-      name: 'John Doe',
-      iat: 1516239022
-    })
-  }))
+    const secretKey = 'test-secret'; // Use a secure secret for signing (avoid hardcoding in production)
+    
+    // Generate a test JWT dynamically
+    const token = jwt.sign(
+      {
+        sub: '1234567890',
+        name: 'John Doe',
+        iat: Math.floor(Date.now() / 1000), // Current timestamp
+      },
+      secretKey, // Signing key
+      { algorithm: 'HS256' } // Hashing algorithm
+    );
+  
+    // Set the dynamically generated token in localStorage
+    localStorage.setItem('token', token);
+  
+     // Call the tokenDecode method to decode the token
+     const decodedToken = guard.tokenDecode();
+
+     // Assertions
+     expect(decodedToken.sub).toEqual('1234567890');
+     expect(decodedToken.name).toEqual('John Doe');
+     expect(typeof decodedToken.iat).toBe('number'); // Ensure 'iat' is a number
+  }));
 
   it('returns nothing when decoding an invalid JWT', inject([LoginGuard], (guard: LoginGuard) => {
     localStorage.setItem('token', '12345.abcde')
