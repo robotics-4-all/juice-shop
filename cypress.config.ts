@@ -45,10 +45,10 @@ export default defineConfig({
             (product) => product.useForChristmasSpecialChallenge
           )[0]
         },
-        GetCouponIntent () {
-          const trainingData = require(`data/chatbot/${utils.extractFilename(
+        async GetCouponIntent () {
+          const trainingData = await import(`data/chatbot/${utils.extractFilename(
             config.get('application.chatBot.trainingData')
-          )}`)
+          )}`);
           const couponIntent = trainingData.data.filter(
             (data: { intent: string }) => data.intent === 'queries.couponCode'
           )[0]
