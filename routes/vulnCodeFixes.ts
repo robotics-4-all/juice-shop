@@ -96,3 +96,5 @@ export const checkCorrectFix = () => async (req: Request<Record<string, unknown>
     }
   }
 }
+
+export default module.exports

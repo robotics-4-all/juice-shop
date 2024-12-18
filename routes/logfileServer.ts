@@ -18,3 +18,5 @@ module.exports = function serveLogFiles () {
     }
   }
 }
+
+export default module.exports

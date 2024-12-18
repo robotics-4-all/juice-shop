@@ -46,3 +46,5 @@ module.exports.getDeliveryMethod = function getDeliveryMethod () {
     }
   }
 }
+
+export default module.exports

@@ -113,3 +113,5 @@ module.exports = function dataExport () {
     }
   }
 }
+
+export default module.exports

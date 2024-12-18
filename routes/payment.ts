@@ -75,3 +75,5 @@ module.exports.delPaymentMethodById = function delPaymentMethodById () {
     }
   }
 }
+
+export default module.exports

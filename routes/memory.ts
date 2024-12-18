@@ -25,3 +25,5 @@ module.exports.getMemories = function getMemories () {
     res.status(200).json({ status: 'success', data: memories })
   }
 }
+
+export default module.exports

@@ -40,3 +40,4 @@ module.exports.nftUnlocked = function nftUnlocked () {
     }
   }
 }
+export default module.exports

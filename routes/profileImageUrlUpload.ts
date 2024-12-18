@@ -40,3 +40,5 @@ module.exports = function profileImageUrlUpload () {
     res.redirect(process.env.BASE_PATH + '/profile')
   }
 }
+
+export default module.exports

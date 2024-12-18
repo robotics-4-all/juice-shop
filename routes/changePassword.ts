@@ -47,3 +47,5 @@ module.exports = function changePassword () {
     }
   }
 }
+
+export default module.exports

@@ -1,8 +1,7 @@
 // Credit for the implementation in JS: https://github.com/daviddossantos/sequelize-notupdate-attributes
-import { type Model, type ValidationErrorItemType } from 'sequelize/types'
+import { type Model } from 'sequelize/types'
 import { type ValidationOptions } from 'sequelize/types/instance-validator'
-// @ts-expect-error FIXME due to non-existing type definitions for sequelize/lib/errors
-import { ValidationError, ValidationErrorItem } from 'sequelize/lib/errors'
+import { ValidationError, ValidationErrorItem } from 'sequelize'
 
 interface ExtendedValidationOptions extends ValidationOptions {
   validate: boolean
@@ -10,8 +9,8 @@ interface ExtendedValidationOptions extends ValidationOptions {
 
 interface ExtendedModel extends Model {
   _changed: Iterable<string> | ArrayLike<string>
-  rawAttributes: Record<string, any>
-  _previousDataValues: Record<string, null>
+  rawAttributes: Record<string, { fieldName: string }>
+  _previousDataValues: Record<string, unknown>
 }
 
 export const makeKeyNonUpdatable = (model: Model, column: string) => {
@@ -20,7 +19,7 @@ export const makeKeyNonUpdatable = (model: Model, column: string) => {
 
     if (instance.isNewRecord) return
 
-    const changedKeys: unknown[] = []
+    const changedKeys: string[] = []
 
     const instanceChanged = Array.from(instance._changed)
 
@@ -28,26 +27,33 @@ export const makeKeyNonUpdatable = (model: Model, column: string) => {
 
     if (changedKeys.length === 0) return
 
-    const validationErrors: ValidationErrorItemType[] = []
+    const validationErrors: ValidationErrorItem[] = []
 
-    changedKeys.forEach((fieldName: any) => {
+    changedKeys.forEach((fieldName: string) => {
       const fieldDefinition = instance.rawAttributes[fieldName]
 
       if (
         instance._previousDataValues[fieldName] !== undefined &&
         instance._previousDataValues[fieldName] !== null &&
-        (fieldDefinition.fieldName === column)
+        fieldDefinition.fieldName === column
       ) {
         validationErrors.push(
           new ValidationErrorItem(
             `\`${fieldName}\` cannot be updated due \`noUpdate\` constraint`,
-            'noUpdate Violation',
-            fieldName
+            'validation error',
+            fieldName,
+            instance.toString(),
+            instance,
+            '',
+            '',
+            []
           )
         )
       }
     })
 
-    if (validationErrors.length > 0) { throw new ValidationError(null, validationErrors) }
+    if (validationErrors.length > 0) {
+      throw new ValidationError('', validationErrors)
+    }
   })
 }

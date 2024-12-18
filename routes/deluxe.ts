@@ -67,3 +67,5 @@ module.exports.deluxeMembershipStatus = function deluxeMembershipStatus () {
     }
   }
 }
+
+export default module.exports

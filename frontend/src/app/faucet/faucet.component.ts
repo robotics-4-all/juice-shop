@@ -1,31 +1,32 @@
-import { Component, ChangeDetectorRef } from '@angular/core'
-import { KeysService } from '../Services/keys.service'
-import { SnackBarHelperService } from '../Services/snack-bar-helper.service'
-import { TranslateService } from '@ngx-translate/core'
+import { Component, ChangeDetectorRef } from '@angular/core'; 
+import { KeysService } from '../Services/keys.service';
+import { SnackBarHelperService } from '../Services/snack-bar-helper.service';
+import { TranslateService } from '@ngx-translate/core';
+import { Web3Service } from '../Services/web3.service'; // **1. Εισαγωγή της υπηρεσίας Web3Service**
 import {
   BeeFaucetABI,
   BeeTokenABI,
   nftABI
-} from '../../assets/public/ContractABIs'
-import { getDefaultProvider, ethers, type BigNumber } from 'ethers'
+} from '../../assets/public/ContractABIs';
+import { getDefaultProvider, ethers, type BigNumber } from 'ethers';
 import {
   createClient,
   connect,
   disconnect,
   getAccount,
   InjectedConnector
-} from '@wagmi/core'
+} from '@wagmi/core';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const client = createClient({
   autoConnect: true,
   provider: getDefaultProvider()
-})
-const { ethereum } = window
+});
+const { ethereum } = window;
 
-const nftAddress = '0x41427790c94E7a592B17ad694eD9c06A02bb9C39'
-const BeeTokenAddress = '0x36435796Ca9be2bf150CE0dECc2D8Fab5C4d6E13'
-const BeeFaucetAddress = '0x860e3616aD0E0dEDc23352891f3E10C4131EA5BC'
+const nftAddress = '0x41427790c94E7a592B17ad694eD9c06A02bb9C39';
+const BeeTokenAddress = '0x36435796Ca9be2bf150CE0dECc2D8Fab5C4d6E13';
+const BeeFaucetAddress = '0x860e3616aD0E0dEDc23352891f3E10C4131EA5BC';
 
 @Component({
   selector: 'app-faucet',
@@ -37,129 +38,132 @@ export class FaucetComponent {
     private readonly keysService: KeysService,
     private readonly snackBarHelperService: SnackBarHelperService,
     private readonly translateService: TranslateService,
-    private readonly changeDetectorRef: ChangeDetectorRef
+    private readonly changeDetectorRef: ChangeDetectorRef,
+    private readonly web3Service: Web3Service // **2. Εισαγωγή της Web3Service στον constructor**
   ) {}
 
-  userData: object
-  session = false
-  deployedContractAddress = ''
-  BEEBalance = 0
-  myBEEBalance = 0
-  withdrawAmount: number = null
-  successResponse = false
-  mintButtonDisabled = true
-  challengeSolved = false
-  nftMintText = 'Mint the Pot - 1000 BEE'
-  errorMessage = ''
-  metamaskAddress = ''
+  userData: object;
+  session = false;
+  deployedContractAddress = '';
+  BEEBalance = 0;
+  myBEEBalance = 0;
+  withdrawAmount: number = 0;
+  successResponse = false;
+  mintButtonDisabled = true;
+  challengeSolved = false;
+  nftMintText = 'Mint the Pot - 1000 BEE';
+  errorMessage = '';
+  metamaskAddress = '';
 
   ngOnInit (): void {
     this.translateService.get('NFT_MINT_TEXT_INTRO').subscribe((translatedString: string) => {
-      this.nftMintText = translatedString
-    })
-    this.handleAuth()
-    this.checkNftMinted()
-    this.nftMintListener()
-    window.ethereum.on('chainChanged', this.handleChainChanged.bind(this))
+      this.nftMintText = translatedString;
+    });
+    this.handleAuth(); // **3. Κλήση της handleAuth για αρχικοποίηση μέσω της υπηρεσίας Web3Service**
+    this.checkNftMinted();
+    this.nftMintListener();
+    if (window.ethereum && typeof window.ethereum.on === 'function') {
+      window.ethereum.on('chainChanged', this.handleChainChanged.bind(this));
+    }
   }
 
   nftMintListener () {
     this.keysService.nftMintListen().subscribe(
       (response) => {
-        console.log(response)
+        console.log(response);
       },
       (error) => {
-        console.error(error)
+        console.error(error);
       }
-    )
+    );
   }
 
   checkNftMinted () {
     this.keysService.checkNftMinted().subscribe(
       (response) => {
-        const challengeSolvedStatus = response.data[0].solved
-        this.mintButtonDisabled = challengeSolvedStatus
-        this.challengeSolved = challengeSolvedStatus
+        const challengeSolvedStatus = response.data[0].solved;
+        this.mintButtonDisabled = challengeSolvedStatus;
+        this.challengeSolved = challengeSolvedStatus;
         if (challengeSolvedStatus) {
           this.translateService.get('NFT_MINT_TEXT_SUCCESS').subscribe((translatedString: string) => {
-            this.nftMintText = translatedString
-          })
+            this.nftMintText = translatedString;
+          });
         }
       },
       (error) => {
-        console.error(error)
-        this.successResponse = false
+        console.error(error);
+        this.successResponse = false;
       }
-    )
+    );
   }
 
   async fetchMyBeeBalance () {
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
-      const signer = provider.getSigner()
+      if (!window.ethereum) {
+        throw new Error('Ethereum provider not found');
+      }
+      const provider = new ethers.providers.Web3Provider(window.ethereum as any);
+      const signer = provider.getSigner();
 
       const contract = new ethers.Contract(
         BeeTokenAddress,
         BeeTokenABI,
         signer
-      )
-      const userAddress = await signer.getAddress()
-      const balanceBigNumber: BigNumber = await contract.balanceOf(userAddress)
-      console.log(balanceBigNumber)
+      );
+      const userAddress = await signer.getAddress();
+      const balanceBigNumber: BigNumber = await contract.balanceOf(userAddress);
+      console.log(balanceBigNumber);
       this.myBEEBalance = balanceBigNumber
         .div(ethers.constants.WeiPerEther)
-        .toNumber()
+        .toNumber();
       if (this.myBEEBalance >= 1000 && !this.challengeSolved) {
-        this.mintButtonDisabled = false
+        this.mintButtonDisabled = false;
       }
       if (this.myBEEBalance <= 1000 && !this.challengeSolved) {
-        this.mintButtonDisabled = true
+        this.mintButtonDisabled = true;
       }
     } catch (error) {
-      console.error('Error fetching BEE balance:', error)
+      console.error('Error fetching BEE balance:', error);
     }
   }
 
   async fetchBeeBalance () {
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
-      const signer = provider.getSigner()
+      const provider = new ethers.providers.Web3Provider(window.ethereum as unknown as ethers.providers.ExternalProvider);
+      const signer = provider.getSigner();
 
       const contract = new ethers.Contract(
         BeeFaucetAddress,
         BeeFaucetABI,
         signer
-      )
-      const balance = await contract.balance()
-      console.log(balance)
-      this.BEEBalance = balance
+      );
+      const balance = await contract.balance();
+      console.log(balance);
+      this.BEEBalance = balance;
     } catch (error) {
-      console.error('Error fetching BEE balance:', error)
+      console.error('Error fetching BEE balance:', error);
     }
   }
 
   async handleChainChanged (chainId: string) {
-    await this.handleAuth()
+    await this.handleAuth(); // **4. Επανεκκίνηση σύνδεσης όταν αλλάζει το chainId**
   }
 
   async handleAuth () {
     try {
-      const { isConnected } = getAccount()
+      const provider = await this.web3Service.initializeWeb3(); // **5. Χρήση της υπηρεσίας Web3Service για αρχικοποίηση**
 
-      if (isConnected) {
-        await disconnect()
-      }
-      if (!window.ethereum) {
-        this.snackBarHelperService.open('PLEASE_INSTALL_WEB3_WALLET', 'errorBar')
-        return
-      }
+      if (!provider) return;
 
-      const provider = await connect({ connector: new InjectedConnector() })
-      this.metamaskAddress = provider.account
+      this.metamaskAddress = provider.account;
       this.userData = {
         address: provider.account,
-        chain: provider.chain.id,
+        chain: provider.chain.chainId,
         network: 'evm'
+      };
+
+      if (!ethereum) {
+        throw new Error('Ethereum provider not found');
       }
       await ethereum.request({
         method: 'wallet_addEthereumChain',
@@ -176,127 +180,131 @@ export class FaucetComponent {
             blockExplorerUrls: ['https://sepolia.etherscan.io/']
           }
         ]
-      })
-      const targetChainId = '11155111'
-      const currentChainId = String(provider.chain?.id)
+      });
+
+      const targetChainId = '11155111';
+      const currentChainId = String(provider.chain?.chainId);
 
       if (provider && currentChainId !== targetChainId) {
-        this.session = false
-        this.snackBarHelperService.open('PLEASE_CONNECT_TO_SEPOLIA_NETWORK', 'errorBar')
+        this.session = false;
+        this.snackBarHelperService.open('PLEASE_CONNECT_TO_SEPOLIA_NETWORK', 'errorBar');
       } else {
-        console.log('Should show ethereum chain now')
-        this.session = true
-        await this.fetchBeeBalance()
-        await this.fetchMyBeeBalance()
+        console.log('Should show ethereum chain now');
+        this.session = true;
+        await this.fetchBeeBalance();
+        await this.fetchMyBeeBalance();
       }
-      console.log('session', this.session)
-      this.changeDetectorRef.detectChanges()
+      console.log('session', this.session);
+      this.changeDetectorRef.detectChanges();
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
   }
 
   async extractBEETokens (amount = this.withdrawAmount) {
     if (!this.session) {
-      this.snackBarHelperService.open('PLEASE_CONNECT_WEB3_WALLET', 'errorBar')
-      return
+      this.snackBarHelperService.open('PLEASE_CONNECT_WEB3_WALLET', 'errorBar');
+      return;
     }
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
-      const signer = provider.getSigner()
-      const userAddress = await signer.getAddress()
+      if (!window.ethereum) {
+        throw new Error('Ethereum provider not found');
+      }
+      const provider = new ethers.providers.Web3Provider(window.ethereum as any);
+      const signer = provider.getSigner();
+      const userAddress = await signer.getAddress();
 
-      const balanceBigNumber = await provider.getBalance(userAddress)
+      const balanceBigNumber = await provider.getBalance(userAddress);
 
-      const balanceEth = ethers.utils.formatEther(balanceBigNumber)
+      const balanceEth = ethers.utils.formatEther(balanceBigNumber);
 
-      console.log('ETH balance:', balanceEth, typeof balanceEth)
+      console.log('ETH balance:', balanceEth, typeof balanceEth);
       if (balanceEth < '0.001') {
-        this.errorMessage = 'Deposit some test ETH from sepoliafaucet.com or any other ETH faucet to initiate transaction.'
-        return
+        this.errorMessage = 'Deposit some test ETH from sepoliafaucet.com or any other ETH faucet to initiate transaction.';
+        return;
       }
       const contract = new ethers.Contract(
         BeeFaucetAddress,
         BeeFaucetABI,
         signer
-      )
-      const tx = await contract.withdraw(amount)
-      await tx.wait()
+      );
+      const tx = await contract.withdraw(amount);
+      await tx.wait();
 
-      console.log('BEE tokens extracted successfully')
-      this.fetchBeeBalance()
-      this.fetchMyBeeBalance()
+      console.log('BEE tokens extracted successfully');
+      this.fetchBeeBalance();
+      this.fetchMyBeeBalance();
     } catch (error) {
-      console.error('Error extracting BEEs:', error.message)
-      this.errorMessage = error.message
+      console.error('Error extracting BEEs:', error.message);
+      this.errorMessage = error.message;
     }
   }
 
   async mintNFT () {
     if (!this.session) {
-      this.snackBarHelperService.open('PLEASE_CONNECT_WEB3_WALLET', 'errorBar')
-      return
+      this.snackBarHelperService.open('PLEASE_CONNECT_WEB3_WALLET', 'errorBar');
+      return;
     }
     this.translateService.get('NFT_MINT_TEXT_AWAITING_APPROVAL').subscribe((translatedString: string) => {
-      this.nftMintText = translatedString
-    })
+      this.nftMintText = translatedString;
+    });
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
-      const signer = provider.getSigner()
-      const amountToApprove = ethers.utils.parseUnits('1000', '18')
+      const provider = new ethers.providers.Web3Provider(window.ethereum as unknown as ethers.providers.ExternalProvider);
+      const signer = provider.getSigner();
+      const amountToApprove = ethers.utils.parseUnits('1000', '18');
       const BeeTokenContract = new ethers.Contract(
         BeeTokenAddress,
         BeeTokenABI,
         signer
-      )
+      );
       const approvalTx = await BeeTokenContract.approve(
         nftAddress,
         amountToApprove
-      )
+      );
 
-      await approvalTx.wait()
+      await approvalTx.wait();
       this.translateService.get('NFT_MINT_TEXT_CONFIRM').subscribe((translatedString: string) => {
-        this.nftMintText = translatedString
-      })
+        this.nftMintText = translatedString;
+      });
 
-      const contract = new ethers.Contract(nftAddress, nftABI, signer)
+      const contract = new ethers.Contract(nftAddress, nftABI, signer);
 
-      const transaction = await contract.mintNFT()
-      console.log(transaction)
+      const transaction = await contract.mintNFT();
+      console.log(transaction);
       this.translateService.get('NFT_MINT_TEXT_IN_PROGRESS').subscribe((translatedString: string) => {
-        this.nftMintText = translatedString
-      })
+        this.nftMintText = translatedString;
+      });
 
-      const mintConfirmation = await transaction.wait()
-      console.log(mintConfirmation)
+      const mintConfirmation = await transaction.wait();
+      console.log(mintConfirmation);
       if (mintConfirmation) {
         this.translateService.get('NFT_MINT_TEXT_SUCCESS').subscribe((translatedString: string) => {
-          this.nftMintText = translatedString
-        })
+          this.nftMintText = translatedString;
+        });
         setTimeout(() => {
           this.keysService.verifyNFTWallet(this.metamaskAddress).subscribe(
             (response) => {
               if (response.success) {
-                this.successResponse = response.status
-                this.mintButtonDisabled = true
+                this.successResponse = response.status;
+                this.mintButtonDisabled = true;
               }
             },
             (error) => {
-              console.error(error)
-              this.successResponse = false
+              console.error(error);
+              this.successResponse = false;
             }
-          )
-        }, 3500)
+          );
+        }, 3500);
       }
 
-      console.log('NFT minted successfully!')
+      console.log('NFT minted successfully!');
     } catch (error) {
-      console.error('Error minting NFT:', error)
+      console.error('Error minting NFT:', error);
     }
   }
 
   async signOut () {
-    await disconnect()
-    this.session = false
+    await disconnect();
+    this.session = false;
   }
 }

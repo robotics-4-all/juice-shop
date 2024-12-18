@@ -1,35 +1,16 @@
 import { Component, ChangeDetectorRef } from '@angular/core'
+
+declare global {
+  interface Window {
+    ethereum: any
+  }
+}
+import { ethers } from 'ethers'
 import { KeysService } from '../Services/keys.service'
 import { SnackBarHelperService } from '../Services/snack-bar-helper.service'
-import { getDefaultProvider, ethers } from 'ethers'
-import {
-  createClient,
-  connect,
-  disconnect,
-  getAccount,
-  InjectedConnector
-} from '@wagmi/core'
-import {
-  solidityCompiler
-} from 'solidity-browser-compiler'
+import { Web3Service } from '../Services/web3.service'  // Εισαγωγή του Web3Service
+import { solidityCompiler, compilerReleases } from 'solidity-browser-compiler'
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const client = createClient({
-  autoConnect: true,
-  provider: getDefaultProvider()
-})
-const { ethereum } = window
-const compilerReleases = {
-  '0.8.21': 'soljson-v0.8.21+commit.d9974bed.js',
-  '0.8.9': 'soljson-v0.8.9+commit.e5eed63a.js',
-  '0.7.6': 'soljson-v0.7.6+commit.7338295f.js',
-  '0.6.12': 'soljson-v0.6.12+commit.27d51765.js',
-  '0.5.17': 'soljson-v0.5.17+commit.d19bba13.js',
-  '0.4.26': 'soljson-v0.4.26+commit.4563c3fc.js',
-  '0.3.6': 'soljson-v0.3.6+commit.3fc68da5.js',
-  '0.2.2': 'soljson-v0.2.2+commit.ef92f566.js',
-  '0.1.7': 'soljson-v0.1.7+commit.b4e666cc.js'
-}
 @Component({
   selector: 'app-web3-sandbox',
   templateUrl: './web3-sandbox.component.html',
@@ -39,27 +20,32 @@ export class Web3SandboxComponent {
   constructor (
     private readonly keysService: KeysService,
     private readonly snackBarHelperService: SnackBarHelperService,
+    private readonly web3Service: Web3Service,  // Εισαγωγή του Web3Service
     private readonly changeDetectorRef: ChangeDetectorRef
   ) {}
 
   ngOnInit (): void {
     this.handleAuth()
-    window.ethereum.on('chainChanged', this.handleChainChanged.bind(this))
+    if (window.ethereum) {
+      if (window.ethereum && window.ethereum.on) {
+        window.ethereum.on('chainChanged', this.handleChainChanged.bind(this))
+      }
+    }
   }
 
   userData: object
   session = false
   metamaskAddress = ''
   selectedContractName: string
-  compiledContracts = []
+  compiledContracts: { [key: string]: any } = {}
   deployedContractAddress = ''
-  contractNames = []
+  contractNames: string[] = []
   commonGweiValue: number = 0
-  contractFunctions = []
+  contractFunctions: Array<{ name: string; inputValues: string; inputs: { type: string }[]; outputs: any[]; stateMutability: string; outputValue: string; inputHints: string }> = []
   invokeOutput = ''
   selectedCompilerVersion: string = '0.8.21'
   compilerVersions: string[] = Object.keys(compilerReleases)
-  compilerErrors = []
+  compilerErrors: any[] = []
 
   code: string = `// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
@@ -69,6 +55,7 @@ contract HelloWorld {
         return 'Hello Contracts';
     }
 }`
+
   editorOptions = {
     mode: 'text/x-solidity',
     theme: 'dracula',
@@ -79,9 +66,7 @@ contract HelloWorld {
   async compileAndFetchContracts (code: string) {
     try {
       this.deployedContractAddress = ''
-      const selectedVersion = compilerReleases[
-        this.selectedCompilerVersion
-      ] as string
+      const selectedVersion = compilerReleases[this.selectedCompilerVersion] as string
 
       if (!selectedVersion) {
         console.error('Selected compiler version not found.')
@@ -94,7 +79,7 @@ contract HelloWorld {
       }
       const output = await solidityCompiler(compilerInput)
       if (output.errors && output.errors.length > 0 && !output.contracts) {
-        this.compiledContracts = null
+        this.compiledContracts = []
         console.log(output.errors)
         this.compilerErrors.push(...output.errors)
       } else {
@@ -123,7 +108,10 @@ contract HelloWorld {
         return
       }
 
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      if (!window.ethereum) {
+        throw new Error('Ethereum provider is not available')
+      }
+      const provider = new ethers.providers.Web3Provider(window.ethereum as any)
       const signer = provider.getSigner()
 
       const contractBytecode = selectedContract.evm.bytecode.object
@@ -178,7 +166,7 @@ contract HelloWorld {
     }
   }
 
-  async invokeFunction (func) {
+  async invokeFunction (func: { name: string, inputValues: string, inputs: Array<{ type: string }>, outputs: any[], stateMutability: string, outputValue: string, inputHints: string }) {
     if (!this.session) {
       this.snackBarHelperService.open('PLEASE_CONNECT_WEB3_WALLET', 'errorBar')
       return
@@ -187,7 +175,10 @@ contract HelloWorld {
       const selectedContract =
         this.compiledContracts[this.selectedContractName]
 
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      if (!window.ethereum) {
+        throw new Error('Ethereum provider is not available')
+      }
+      const provider = new ethers.providers.Web3Provider(window.ethereum as any)
       const signer = provider.getSigner()
       const contract = new ethers.Contract(
         this.deployedContractAddress,
@@ -219,11 +210,11 @@ contract HelloWorld {
         func.outputs.length > 0 &&
         (func.stateMutability === 'view' || func.stateMutability === 'pure')
       ) {
-        console.log('hello')
         const outputValue = transaction[0].toString()
-        const updatedFunc = this.contractFunctions.find(
-          (f) => f.name === func.name
+        const foundFunc = this.contractFunctions.find(
+          (f: { name: string }) => f.name === func.name
         )
+        const updatedFunc = foundFunc ? { ...foundFunc, outputValue } : null
         if (updatedFunc) {
           updatedFunc.outputValue = outputValue
           const index = this.contractFunctions.indexOf(func)
@@ -231,7 +222,6 @@ contract HelloWorld {
             this.contractFunctions[index] = updatedFunc
           }
         }
-        console.log(func.outputValue)
       }
       console.log('Invoked:', transaction)
     } catch (error) {
@@ -255,24 +245,25 @@ contract HelloWorld {
 
   async handleAuth () {
     try {
-      const { isConnected } = getAccount()
+      const isConnected = await this.web3Service.isConnected()  // Χρήση του Web3Service για σύνδεση
 
       if (isConnected) {
-        await disconnect()
+        // await this.web3Service.disconnect()
       }
       if (!window.ethereum) {
         this.snackBarHelperService.open('PLEASE_INSTALL_WEB3_WALLET', 'errorBar')
         return
       }
 
-      const provider = await connect({ connector: new InjectedConnector() })
+      const provider = await this.web3Service.connect()  // Χρήση του Web3Service για σύνδεση
       this.metamaskAddress = provider.account
       this.userData = {
         address: provider.account,
         chain: provider.chain.id,
         network: 'evm'
       }
-      await ethereum.request({
+
+      await window.ethereum.request({
         method: 'wallet_addEthereumChain',
         params: [
           {
@@ -288,6 +279,7 @@ contract HelloWorld {
           }
         ]
       })
+
       const targetChainId = '11155111'
       const currentChainId = String(provider.chain?.id)
 
@@ -295,10 +287,8 @@ contract HelloWorld {
         this.session = false
         this.snackBarHelperService.open('PLEASE_CONNECT_TO_SEPOLIA_NETWORK', 'errorBar')
       } else {
-        console.log('Should show ethereum chain now')
         this.session = true
       }
-      console.log('session', this.session)
       this.changeDetectorRef.detectChanges()
     } catch (err) {
       console.log('An error occured')

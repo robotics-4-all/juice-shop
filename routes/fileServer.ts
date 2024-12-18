@@ -53,3 +53,4 @@ module.exports = function servePublicFiles () {
     return utils.endsWith(param, '.md') || utils.endsWith(param, '.pdf')
   }
 }
+export default module.exports

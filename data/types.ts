@@ -24,11 +24,19 @@ export type Card = CardModel
 
 export type Product = ProductModel
 
+
 export interface Review {
-  text: string
-  author: string
-  liked: boolean
-  likedBy: string[]
+
+  _id: string;
+
+  message: string;
+
+  author: string;
+
+  likedBy: string[];
+
+  likesCount: number;
+
 }
 
 export type Memory = MemoryModel

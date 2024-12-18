@@ -44,3 +44,4 @@ module.exports.walletNFTVerify = function walletNFTVerify () {
     }
   }
 }
+export default module.exports

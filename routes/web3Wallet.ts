@@ -30,3 +30,4 @@ module.exports.contractExploitListener = function contractExploitListener () {
     }
   }
 }
+export default module.exports

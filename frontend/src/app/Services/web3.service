@@ -1,0 +1,75 @@
+
+import { Injectable } from '@angular/core';
+
+import { ethers } from 'ethers';
+
+declare global {
+  interface Window {
+    ethereum: any;
+  }
+}
+
+
+@Injectable({
+  providedIn: 'root'
+})
+export class Web3Service {
+  constructor() { }
+
+  async initializeWeb3() {
+    if (!window.ethereum) {
+      throw new Error('No crypto wallet found. Please install it.');
+    }
+    const provider = new ethers.providers.Web3Provider(window.ethereum as any);
+    await provider.send('eth_requestAccounts', []);
+    const signer = provider.getSigner();
+    const account = await signer.getAddress();
+    const chain = await provider.getNetwork();
+    return { provider, account, chain };
+  }
+
+  async getUserEthBalance(metamaskAddress: string, bankAddress: string): Promise<string> {
+    // Implement the logic to get the user's ETH balance
+    // This is a placeholder implementation
+    return '0';
+  }
+
+  async depositETH(amount: number, bankAddress: string): Promise<any> {
+    // Implement the logic for depositing ETH here
+    return Promise.resolve();
+  }
+
+async withdrawETH(amount: number, bankAddress: string): Promise<any> {
+  const web3WalletABI = [
+    // Add the ABI definition here
+  ];
+  const provider = new ethers.providers.Web3Provider(window.ethereum as any);
+  const signer = provider.getSigner();
+  const contract = new ethers.Contract(bankAddress, web3WalletABI, signer);
+
+  const transaction = await contract.withdrawETH(ethers.utils.parseEther(amount.toString()));
+
+  return transaction;
+}
+  
+  getAccountStatus() {
+    // Implement the logic to get account status
+    return { isConnected: false }; // Example return value
+  }
+  async connectWallet(): Promise<{ account: string, chain: { id: string } }> {
+    // Implementation for connecting to the wallet
+    return { account: '0xYourAccountAddress', chain: { id: '1' } }
+  }
+
+  async isConnected(): Promise<boolean> {
+    // Implement the logic to check if the Web3 wallet is connected
+    return !!window.ethereum && window.ethereum.selectedAddress !== null;
+  }
+}
+
+
+// The duplicate Web3Service class has been removed.
+
+
+// The duplicate Web3Service class has been removed.
+

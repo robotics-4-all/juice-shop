@@ -118,3 +118,5 @@ exports.checkVulnLines = () => async (req: Request<Record<string, unknown>, Reco
     })
   }
 }
+
+export default module.exports
