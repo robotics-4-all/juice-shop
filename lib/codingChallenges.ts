@@ -1,6 +1,7 @@
 import fs from 'fs/promises'
 import path from 'path'
 import logger from './logger'
+import safeRegex from 'safe-regex'
 
 export const SNIPPET_PATHS = Object.freeze(['./server.ts', './routes', './lib', './data', './data/static/web3-snippets', './frontend/src/app', './models'])
 
@@ -15,6 +16,10 @@ interface CachedCodeChallenge {
   neutralLines: number[]
 }
 
+function sanitizePath (inputPath: string): string {
+  return path.normalize(inputPath).replace(/^(\.\.(\/|\\|$))+/, '')
+}
+
 export const findFilesWithCodeChallenges = async (paths: readonly string[]): Promise<FileMatch[]> => {
   const matches = []
   for (const currPath of paths) {
@@ -22,7 +27,8 @@ export const findFilesWithCodeChallenges = async (paths: readonly string[]): Pro
       const files = await fs.readdir(currPath)
       const moreMatches = await findFilesWithCodeChallenges(
         files.map(file => {
-          const resolvedPath = path.resolve(currPath, file)
+          const sanitizedFile = sanitizePath(file)
+          const resolvedPath = path.resolve(currPath, sanitizedFile)
           if (!resolvedPath.startsWith(currPath)) {
             throw new Error('Invalid file path')
           }
@@ -88,17 +94,13 @@ function getCodingChallengeFromFileContent (source: string, challengeKey: string
   const vulnPattern = `vuln-code-snippet vuln-line.*${challengeKey}`
   const neutralPattern = `vuln-code-snippet neutral-line.*${challengeKey}`
 
-  const vulnPatternRegex = new RegExp(vulnPattern)
-  const neutralPatternRegex = new RegExp(neutralPattern)
-
-  // Check if regex patterns are safe
-  if (vulnPatternRegex.test(vulnPattern) || neutralPatternRegex.test(neutralPattern)) {
+  if (!safeRegex(vulnPattern) || !safeRegex(neutralPattern)) {
     throw new Error('Unsafe regex pattern detected')
   }
 
   // Use the validated and safe regex patterns
-  const vulnRegex = new RegExp(vulnPattern)
-  const neutralRegex = new RegExp(neutralPattern)
+  const vulnRegex = new RegExp(vulnPattern, 'g')
+  const neutralRegex = new RegExp(neutralPattern, 'g')
   for (let i = 0; i < lines.length; i++) {
     if (vulnRegex.exec(lines[i]) != null) {
       vulnLines.push(i + 1)
