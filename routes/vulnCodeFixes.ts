@@ -81,7 +81,9 @@ export const checkCorrectFix =
       if (fs.existsSync("./data/static/codefixes/" + key + ".info.yml")) {
         const codingChallengeInfos = yaml.load(fs.readFileSync("./data/static/codefixes/" + key + ".info.yml", "utf8"));
         const selectedFixInfo = codingChallengeInfos?.fixes.find(({ id }: { id: number }) => id === selectedFix + 1);
-        if (selectedFixInfo?.explanation) explanation = res.__(selectedFixInfo.explanation);
+        if (selectedFixInfo?.explanation) {
+          explanation = res.__(selectedFixInfo.explanation);
+        }
       }
       res.status(200).json({
         fixes: fixData.fixes
