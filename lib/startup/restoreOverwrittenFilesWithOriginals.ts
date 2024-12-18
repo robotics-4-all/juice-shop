@@ -9,28 +9,55 @@ import logger from '../logger'
 import { copyFile, access } from 'fs/promises'
 import { glob } from 'glob'
 
+import { existsSync } from 'fs';
+
 const exists = async (path: string) => await access(path).then(() => true).catch(() => false)
 
-const restoreOverwrittenFilesWithOriginals = async () => {
-  await copyFile(path.resolve('data/static/legal.md'), path.resolve('ftp/legal.md'))
-
-  if (await exists(path.resolve('frontend/dist'))) {
-    await copyFile(
-      path.resolve('data/static/owasp_promo.vtt'),
-      path.resolve('frontend/dist/frontend/assets/public/videos/owasp_promo.vtt')
-    )
-  }
-
+// Helper function to safely copy files with error handling
+const safeCopyFile = async (source: string, destination: string): Promise<void> => {
   try {
-    const files = await glob(path.resolve('data/static/i18n/*.json'))
-    await Promise.all(
-      files.map(async (filename: string) => {
-        await copyFile(filename, path.resolve('i18n/', filename.substring(filename.lastIndexOf('/') + 1)))
-      })
-    )
+    // Validate paths to prevent path traversal
+    if (!source.startsWith(path.resolve('./data/static'))) {
+      throw new Error(`Invalid source path: ${source}`);
+    }
+
+    await copyFile(source, destination);
+    logger.info(`File copied: ${source} -> ${destination}`);
   } catch (err) {
-    logger.warn('Error listing JSON files in /data/static/i18n folder: ' + utils.getErrorMessage(err))
+    logger.error(`Failed to copy file from ${source} to ${destination}: ${utils.getErrorMessage(err)}`);
   }
-}
+};
+
+const restoreOverwrittenFilesWithOriginals = async (): Promise<void> => {
+  const baseDir = path.resolve('./'); // Define base directory for safety
+  const staticDir = path.resolve(baseDir, 'data/static'); // Static data directory
+
+  // Safely copy legal.md
+  await safeCopyFile(
+    path.resolve(staticDir, 'legal.md'),
+    path.resolve(baseDir, 'ftp/legal.md')
+  );
+
+  // Check if 'frontend/dist' exists
+  if (existsSync(path.resolve(baseDir, 'frontend/dist'))) {
+    await safeCopyFile(
+      path.resolve(staticDir, 'owasp_promo.vtt'),
+      path.resolve(baseDir, 'frontend/dist/frontend/assets/public/videos/owasp_promo.vtt')
+    );
+  }
+
+  // Copy all JSON files from static/i18n to i18n
+  try {
+    const jsonFiles = await glob(path.resolve(staticDir, 'i18n/*.json'));
+    await Promise.all(
+      jsonFiles.map(async (filename) => {
+        const destination = path.resolve(baseDir, 'i18n', path.basename(filename));
+        await safeCopyFile(filename, destination);
+      })
+    );
+  } catch (err) {
+    logger.warn(`Error listing JSON files in /data/static/i18n folder: ${utils.getErrorMessage(err)}`);
+  }
+};
 
 export default restoreOverwrittenFilesWithOriginals

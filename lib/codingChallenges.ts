@@ -15,32 +15,50 @@ interface CachedCodeChallenge {
   neutralLines: number[]
 }
 
-export const findFilesWithCodeChallenges = async (paths: readonly string[]): Promise<FileMatch[]> => {
-  const matches = []
-  for (const currPath of paths) {
-    if ((await fs.lstat(currPath)).isDirectory()) {
-      const files = await fs.readdir(currPath)
-      const moreMatches = await findFilesWithCodeChallenges(
-        files.map(file => path.resolve(currPath, file))
-      )
-      matches.push(...moreMatches)
-    } else {
-      try {
-        const code = await fs.readFile(currPath, 'utf8')
+export const findFilesWithCodeChallenges = async (
+  paths: readonly string[],
+  baseDir: string = process.cwd() // Base directory to restrict traversal
+): Promise<FileMatch[]> => {
+  const matches: FileMatch[] = [];
+
+  // Helper function to validate paths
+  const isSafePath = (targetPath: string, baseDir: string): boolean => {
+    const resolvedPath = path.resolve(baseDir, targetPath);
+    return resolvedPath.startsWith(baseDir); // Ensure the path stays within baseDir
+  };
+
+  const processPath = async (currPath: string): Promise<void> => {
+    if (!isSafePath(currPath, baseDir)) {
+      throw new Error(`Path traversal detected: ${currPath}`);
+    }
+
+    try {
+      const stats = await fs.lstat(currPath);
+      if (stats.isDirectory()) {
+        const files = await fs.readdir(currPath);
+        const fullPaths = files.map((file) => path.resolve(currPath, file));
+        await Promise.all(fullPaths.map(processPath)); // Process files concurrently
+      } else {
+        const code = await fs.readFile(currPath, 'utf8');
         if (
-          // strings are split so that it doesn't find itself...
-          code.includes('// vuln-code' + '-snippet start') ||
-          code.includes('# vuln-code' + '-snippet start')
+          code.includes('// vuln-code-snippet start') || // Match JavaScript-like comments
+          code.includes('# vuln-code-snippet start')    // Match Python-like comments
         ) {
-          matches.push({ path: currPath, content: code })
+          matches.push({ path: currPath, content: code });
         }
-      } catch (e) {
-        logger.warn(`File ${currPath} could not be read. it might have been moved or deleted. If coding challenges are contained in the file, they will not be available.`)
+      }
+    } catch (e) {
+      if (e instanceof Error) {
+        console.warn(`File ${currPath} could not be read: ${e.message}`);
+      } else {
+        console.warn(`File ${currPath} could not be read: Unknown error`);
       }
     }
-  }
+  };
 
-  return matches
+  // Process all initial paths concurrently
+  await Promise.all(paths.map(processPath));
+  return matches;
 }
 
 function getCodeChallengesFromFile (file: FileMatch) {
@@ -55,33 +73,56 @@ function getCodeChallengesFromFile (file: FileMatch) {
   return challenges.map((challengeKey) => getCodingChallengeFromFileContent(fileContent, challengeKey))
 }
 
-function getCodingChallengeFromFileContent (source: string, challengeKey: string) {
-  const snippets = source.match(`[/#]{0,2} vuln-code-snippet start.*${challengeKey}([^])*vuln-code-snippet end.*${challengeKey}`)
-  if (snippets == null) {
-    throw new BrokenBoundary('Broken code snippet boundaries for: ' + challengeKey)
-  }
-  let snippet = snippets[0] // TODO Currently only a single code snippet is supported
-  snippet = snippet.replace(/\s?[/#]{0,2} vuln-code-snippet start.*[\r\n]{0,2}/g, '')
-  snippet = snippet.replace(/\s?[/#]{0,2} vuln-code-snippet end.*/g, '')
-  snippet = snippet.replace(/.*[/#]{0,2} vuln-code-snippet hide-line[\r\n]{0,2}/g, '')
-  snippet = snippet.replace(/.*[/#]{0,2} vuln-code-snippet hide-start([^])*[/#]{0,2} vuln-code-snippet hide-end[\r\n]{0,2}/g, '')
-  snippet = snippet.trim()
+function escapeRegExp(input: string): string {
+  return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape special regex characters
+}
 
-  let lines = snippet.split('\r\n')
-  if (lines.length === 1) lines = snippet.split('\n')
-  if (lines.length === 1) lines = snippet.split('\r')
-  const vulnLines = []
-  const neutralLines = []
+function getCodingChallengeFromFileContent(source: string, challengeKey: string) {
+  // Escape challengeKey to prevent ReDoS attacks
+  const safeChallengeKey = escapeRegExp(challengeKey);
+
+  // Use sanitized challengeKey in regex patterns
+  const snippets = source.match(
+    new RegExp(
+      `[/#]{0,2} vuln-code-snippet start.*${safeChallengeKey}([^])*vuln-code-snippet end.*${safeChallengeKey}`,
+      'g'
+    )
+  );
+
+  if (snippets == null) {
+    throw new BrokenBoundary('Broken code snippet boundaries for: ' + challengeKey);
+  }
+
+  let snippet = snippets[0]; // Currently only a single code snippet is supported
+  snippet = snippet.replace(new RegExp(`\\s?[/#]{0,2} vuln-code-snippet start.*[\\r\\n]{0,2}`, 'g'), '');
+  snippet = snippet.replace(new RegExp(`\\s?[/#]{0,2} vuln-code-snippet end.*`, 'g'), '');
+  snippet = snippet.replace(new RegExp(`.*[/#]{0,2} vuln-code-snippet hide-line[\\r\\n]{0,2}`, 'g'), '');
+  snippet = snippet.replace(
+    new RegExp(`.*[/#]{0,2} vuln-code-snippet hide-start([^])*[/#]{0,2} vuln-code-snippet hide-end[\\r\\n]{0,2}`, 'g'),
+    ''
+  );
+
+  snippet = snippet.trim();
+
+  let lines = snippet.split('\r\n');
+  if (lines.length === 1) lines = snippet.split('\n');
+  if (lines.length === 1) lines = snippet.split('\r');
+
+  const vulnLines: number[] = [];
+  const neutralLines: number[] = [];
+
   for (let i = 0; i < lines.length; i++) {
-    if (new RegExp(`vuln-code-snippet vuln-line.*${challengeKey}`).exec(lines[i]) != null) {
-      vulnLines.push(i + 1)
-    } else if (new RegExp(`vuln-code-snippet neutral-line.*${challengeKey}`).exec(lines[i]) != null) {
-      neutralLines.push(i + 1)
+    if (new RegExp(`vuln-code-snippet vuln-line.*${safeChallengeKey}`).exec(lines[i])) {
+      vulnLines.push(i + 1);
+    } else if (new RegExp(`vuln-code-snippet neutral-line.*${safeChallengeKey}`).exec(lines[i])) {
+      neutralLines.push(i + 1);
     }
   }
-  snippet = snippet.replace(/\s?[/#]{0,2} vuln-code-snippet vuln-line.*/g, '')
-  snippet = snippet.replace(/\s?[/#]{0,2} vuln-code-snippet neutral-line.*/g, '')
-  return { challengeKey, snippet, vulnLines, neutralLines }
+
+  snippet = snippet.replace(new RegExp(`\\s?[/#]{0,2} vuln-code-snippet vuln-line.*`, 'g'), '');
+  snippet = snippet.replace(new RegExp(`\\s?[/#]{0,2} vuln-code-snippet neutral-line.*`, 'g'), '');
+
+  return { challengeKey, snippet, vulnLines, neutralLines };
 }
 
 class BrokenBoundary extends Error {

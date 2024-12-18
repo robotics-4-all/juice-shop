@@ -17,7 +17,7 @@
       "dom"
     ],
     "typeRoots": ["./node_modules/@types", "./src/types"],
-    "types": ["node", "cypress", "jest"]
+    "types": ["node", "jest"]
   },
   "include" : [
     "cypress/**/*.ts",

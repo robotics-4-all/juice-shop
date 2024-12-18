@@ -3,11 +3,39 @@ import { readFile } from 'fs/promises'
 import { safeLoad } from 'js-yaml'
 import logger from '../lib/logger'
 
-export async function loadStaticData (file: string) {
-  const filePath = path.resolve('./data/static/' + file + '.yml')
-  return await readFile(filePath, 'utf8')
-    .then(safeLoad)
-    .catch(() => logger.error('Could not open file: "' + filePath + '"'))
+import sanitizeFilename from 'sanitize-filename';
+
+// Whitelist allowed filenames
+function isValidFilename(file: string): boolean {
+  const validFilenameRegex = /^[a-zA-Z0-9._-]+$/; // Allow alphanumeric, dots, hyphens, and underscores
+  return validFilenameRegex.test(file);
+}
+
+// Load static data securely
+export async function loadStaticData(file: string) {
+  try {
+    // Sanitize and validate the file name
+    const sanitizedFile = sanitizeFilename(file);
+    if (!sanitizedFile || !isValidFilename(sanitizedFile)) {
+      throw new Error('Invalid file name');
+    }
+
+    // Define a base directory for security
+    const baseDir = path.resolve('./data/static');
+    const filePath = path.resolve(baseDir, sanitizedFile + '.yml');
+
+    // Ensure the filePath is within the allowed directory
+    if (!filePath.startsWith(baseDir)) {
+      throw new Error('Path traversal attempt detected');
+    }
+
+    // Safely read the file
+    const fileContent = await readFile(filePath, 'utf8');
+    return safeLoad(fileContent);
+  } catch (err) {
+    logger.error('Could not open file: "' + file + '"', err);
+    return null;
+  }
 }
 
 export interface StaticUser {
