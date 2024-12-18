@@ -56,12 +56,14 @@ export const solve = function (challenge: Challenge, isRestore = false) {
         })
       }
     }
+  }).catch((error: unknown) => {
+    logger.error('Challenge save failed: ' + colors.red(utils.getErrorMessage(error)))
   })
 }
 
-function notifyChallenge(challenge: Challenge, isRestore: boolean) {
-  // Add logic to send notification
-}
+// function notifyChallenge(challenge: Challenge, isRestore: boolean) {
+//   // Add logic to send notification
+// }
 
 export const someOtherFunction = function (challenge: Challenge, data: string) {
   if (notSolved(challenge)) {
@@ -100,7 +102,6 @@ export const sendCodingChallengeNotification = function (challenge: { key: strin
     }
   }
 }
-
 
 export const findChallengeByName = (challengeName: string) => {
   for (const c in challenges) {
