@@ -2,10 +2,9 @@
  * Copyright (c) 2014-2024 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
-
 import jwtDecode from 'jwt-decode'
 
-let config
+let config: { [key: string]: any } | undefined
 const playbackDelays = {
   faster: 0.5,
   fast: 0.75,
@@ -14,17 +13,20 @@ const playbackDelays = {
   slower: 1.5
 }
 
-export async function sleep (timeInMs: number): Promise<void> {
-  await new Promise((resolve) => {
+interface WaitForInputOptions {
+  ignoreCase: boolean;
+  replacement?: [string, string];
+}
+
+export async function sleep(timeInMs: number): Promise<void> {
+  await new Promise<void>((resolve) => {
     setTimeout(resolve, timeInMs)
   })
 }
 
-export function waitForInputToHaveValue (inputSelector: string, value: string, options: any = { ignoreCase: true, replacement: [] }) {
-  return async () => {
-    const inputElement: HTMLInputElement = document.querySelector(
-      inputSelector
-    )
+export function waitForInputToHaveValue(inputSelector: string, value: string, options: WaitForInputOptions = { ignoreCase: true, replacement: ["", ""] }) {
+  return async (): Promise<void> => {
+    const inputElement: HTMLInputElement | null = document.querySelector(inputSelector)
 
     if (options.replacement?.length === 2) {
       if (!config) {
@@ -33,34 +35,30 @@ export function waitForInputToHaveValue (inputSelector: string, value: string, o
         config = json.config
       }
       const propertyChain = options.replacement[1].split('.')
-      let replacementValue = config
+      let replacementValue: any = config
+
       for (const property of propertyChain) {
-        replacementValue = replacementValue[property]
+        // Έλεγχος για το undefined πριν την πρόσβαση στην ιδιότητα
+        if (replacementValue !== undefined && replacementValue !== null) {
+          replacementValue = replacementValue[property]
+        } else {
+          console.warn(`Replacement value for ${options.replacement[1]} is undefined at property "${property}".`)
+          break
+        }
       }
-      value = value.replace(options.replacement[0], replacementValue)
+
+      // Αν το replacementValue δεν είναι undefined, προχωράμε στην αντικατάσταση
+      if (replacementValue !== undefined) {
+        value = value.replace(options.replacement[0], replacementValue)
+      } else {
+        console.warn(`Replacement value for ${options.replacement[0]} is undefined.`)
+      }
     }
 
     while (true) {
-      if (options.ignoreCase && inputElement.value.toLowerCase() === value.toLowerCase()) {
+      if (inputElement && options.ignoreCase && inputElement.value.toLowerCase() === value.toLowerCase()) {
         break
-      } else if (!options.ignoreCase && inputElement.value === value) {
-        break
-      }
-      await sleep(100)
-    }
-  }
-}
-
-export function waitForInputToNotHaveValue (inputSelector: string, value: string, options = { ignoreCase: true }) {
-  return async () => {
-    const inputElement: HTMLInputElement = document.querySelector(
-      inputSelector
-    )
-
-    while (true) {
-      if (options.ignoreCase && inputElement.value.toLowerCase() !== value.toLowerCase()) {
-        break
-      } else if (!options.ignoreCase && inputElement.value !== value) {
+      } else if (inputElement && !options.ignoreCase && inputElement.value === value) {
         break
       }
       await sleep(100)
@@ -68,14 +66,50 @@ export function waitForInputToNotHaveValue (inputSelector: string, value: string
   }
 }
 
-export function waitForInputToNotHaveValueAndNotBeEmpty (inputSelector: string, value: string, options = { ignoreCase: true }) {
-  return async () => {
-    const inputElement: HTMLInputElement = document.querySelector(
-      inputSelector
-    )
+// Κλήσεις της συνάρτησης με την παράμετρο ignoreCase
+resolved: waitForInputToHaveValue('#email', 'bender@juice-sh.op', { 
+  replacement: ['juice-sh.op', 'application.domain'], 
+  ignoreCase: true // Προσθέτουμε το ignoreCase
+})
+
+resolved: waitForInputToHaveValue('#email', "bender@juice-sh.op'--", { 
+  replacement: ['juice-sh.op', 'application.domain'], 
+  ignoreCase: true // Προσθέτουμε το ignoreCase
+})
+
+resolved: waitForInputToHaveValue('#email', 'jim@juice-sh.op', { 
+  replacement: ['juice-sh.op', 'application.domain'], 
+  ignoreCase: true // Προσθέτουμε το ignoreCase
+})
+
+resolved: waitForInputToHaveValue('#email', "jim@juice-sh.op'--", { 
+  replacement: ['juice-sh.op', 'application.domain'], 
+  ignoreCase: true // Προσθέτουμε το ignoreCase
+})
+
+
+
+export function waitForInputToNotHaveValue(inputSelector: string, value: string, options: { ignoreCase: boolean } = { ignoreCase: true }) {
+  return async (): Promise<void> => {
+    const inputElement: HTMLInputElement | null = document.querySelector(inputSelector)
 
     while (true) {
-      if (inputElement.value !== '') {
+      if (inputElement && options.ignoreCase && inputElement.value.toLowerCase() !== value.toLowerCase()) {
+        break
+      } else if (inputElement && !options.ignoreCase && inputElement.value !== value) {
+        break
+      }
+      await sleep(100)
+    }
+  }
+}
+
+export function waitForInputToNotHaveValueAndNotBeEmpty(inputSelector: string, value: string, options: { ignoreCase: boolean } = { ignoreCase: true }) {
+  return async (): Promise<void> => {
+    const inputElement: HTMLInputElement | null = document.querySelector(inputSelector)
+
+    while (true) {
+      if (inputElement && inputElement.value !== '') {
         if (options.ignoreCase && inputElement.value.toLowerCase() !== value.toLowerCase()) {
           break
         } else if (!options.ignoreCase && inputElement.value !== value) {
@@ -87,14 +121,12 @@ export function waitForInputToNotHaveValueAndNotBeEmpty (inputSelector: string, 
   }
 }
 
-export function waitForInputToNotBeEmpty (inputSelector: string) {
-  return async () => {
-    const inputElement: HTMLInputElement = document.querySelector(
-      inputSelector
-    )
+export function waitForInputToNotBeEmpty(inputSelector: string) {
+  return async (): Promise<void> => {
+    const inputElement: HTMLInputElement | null = document.querySelector(inputSelector)
 
     while (true) {
-      if (inputElement.value && inputElement.value !== '') {
+      if (inputElement && inputElement.value && inputElement.value !== '') {
         break
       }
       await sleep(100)
@@ -102,27 +134,25 @@ export function waitForInputToNotBeEmpty (inputSelector: string) {
   }
 }
 
-export function waitForElementToGetClicked (elementSelector: string) {
-  return async () => {
-    const element = document.querySelector(
-      elementSelector
-    )
+export function waitForElementToGetClicked(elementSelector: string) {
+  return async (): Promise<void> => {
+    const element: HTMLElement | null = document.querySelector(elementSelector)
     if (!element) {
       console.warn(`Could not find Element with selector "${elementSelector}"`)
     }
 
     await new Promise<void>((resolve) => {
-      element.addEventListener('click', () => { resolve() })
+      if (element) {
+        element.addEventListener('click', () => { resolve() })
+      }
     })
   }
 }
 
-export function waitForElementsInnerHtmlToBe (elementSelector: string, value: string) {
-  return async () => {
+export function waitForElementsInnerHtmlToBe(elementSelector: string, value: string) {
+  return async (): Promise<void> => {
     while (true) {
-      const element = document.querySelector(
-        elementSelector
-      )
+      const element: HTMLElement | null = document.querySelector(elementSelector)
 
       if (element && element.innerHTML === value) {
         break
@@ -132,21 +162,20 @@ export function waitForElementsInnerHtmlToBe (elementSelector: string, value: st
   }
 }
 
-export function waitInMs (timeInMs: number) {
-  return async () => {
+export function waitInMs(timeInMs: number) {
+  return async (): Promise<void> => {
     if (!config) {
       const res = await fetch('/rest/admin/application-configuration')
       const json = await res.json()
       config = json.config
     }
-    let delay = playbackDelays[config.hackingInstructor.hintPlaybackSpeed]
-    delay ??= 1.0
+    let delay = playbackDelays[config?.hackingInstructor?.hintPlaybackSpeed as keyof typeof playbackDelays] ?? 1.0
     await sleep(timeInMs * delay)
   }
 }
 
-export function waitForAngularRouteToBeVisited (route: string) {
-  return async () => {
+export function waitForAngularRouteToBeVisited(route: string) {
+  return async (): Promise<void> => {
     while (true) {
       if (window.location.hash.startsWith(`#/${route}`)) {
         break
@@ -156,8 +185,8 @@ export function waitForAngularRouteToBeVisited (route: string) {
   }
 }
 
-export function waitForLogIn () {
-  return async () => {
+export function waitForLogIn() {
+  return async (): Promise<void> => {
     while (true) {
       if (localStorage.getItem('token') !== null) {
         break
@@ -167,14 +196,14 @@ export function waitForLogIn () {
   }
 }
 
-export function waitForAdminLogIn () {
-  return async () => {
+export function waitForAdminLogIn() {
+  return async (): Promise<void> => {
     while (true) {
       let role: string = ''
       try {
-        const token: string = localStorage.getItem('token')
+        const token: string = localStorage.getItem('token') || ''
         const decodedToken = jwtDecode(token)
-        const payload = decodedToken as any
+        const payload = decodedToken as { data: { role: string } }
         role = payload.data.role
       } catch {
         console.log('Role from token could not be accessed.')
@@ -187,8 +216,8 @@ export function waitForAdminLogIn () {
   }
 }
 
-export function waitForLogOut () {
-  return async () => {
+export function waitForLogOut() {
+  return async (): Promise<void> => {
     while (true) {
       if (localStorage.getItem('token') === null) {
         break
@@ -198,14 +227,10 @@ export function waitForLogOut () {
   }
 }
 
-/**
- * see https://stackoverflow.com/questions/7798748/find-out-whether-chrome-console-is-open/48287643#48287643
- * does detect when devtools are opened horizontally or vertically but not when undocked or open on page load
- */
-export function waitForDevTools () {
+export function waitForDevTools() {
   const initialInnerHeight = window.innerHeight
   const initialInnerWidth = window.innerWidth
-  return async () => {
+  return async (): Promise<void> => {
     while (true) {
       if (window.innerHeight !== initialInnerHeight || window.innerWidth !== initialInnerWidth) {
         break
@@ -215,14 +240,12 @@ export function waitForDevTools () {
   }
 }
 
-export function waitForSelectToHaveValue (selectSelector: string, value: string) {
-  return async () => {
-    const selectElement: HTMLSelectElement = document.querySelector(
-      selectSelector
-    )
+export function waitForSelectToHaveValue(selectSelector: string, value: string) {
+  return async (): Promise<void> => {
+    const selectElement: HTMLSelectElement | null = document.querySelector(selectSelector)
 
     while (true) {
-      if (selectElement.options[selectElement.selectedIndex].value === value) {
+      if (selectElement && selectElement.options[selectElement.selectedIndex].value === value) {
         break
       }
       await sleep(100)
@@ -230,14 +253,12 @@ export function waitForSelectToHaveValue (selectSelector: string, value: string)
   }
 }
 
-export function waitForSelectToNotHaveValue (selectSelector: string, value: string) {
-  return async () => {
-    const selectElement: HTMLSelectElement = document.querySelector(
-      selectSelector
-    )
+export function waitForSelectToNotHaveValue(selectSelector: string, value: string) {
+  return async (): Promise<void> => {
+    const selectElement: HTMLSelectElement | null = document.querySelector(selectSelector)
 
     while (true) {
-      if (selectElement.options[selectElement.selectedIndex].value !== value) {
+      if (selectElement && selectElement.options[selectElement.selectedIndex].value !== value) {
         break
       }
       await sleep(100)
@@ -245,8 +266,8 @@ export function waitForSelectToNotHaveValue (selectSelector: string, value: stri
   }
 }
 
-export function waitForRightUriQueryParamPair (key: string, value: string) {
-  return async () => {
+export function waitForRightUriQueryParamPair(key: string, value: string) {
+  return async (): Promise<void> => {
     while (true) {
       const encodedValue: string = encodeURIComponent(value).replace(/%3A/g, ':')
       const encodedKey: string = encodeURIComponent(key).replace(/%3A/g, ':')
