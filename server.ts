@@ -41,19 +41,19 @@ import authenticatedUsers from './routes/authenticatedUsers'
 
 const startTime = Date.now()
 const finale = require('finale-rest')
-const express = require('express')
-const compression = require('compression')
-const helmet = require('helmet')
-const featurePolicy = require('feature-policy')
+import express from 'express'
+import compression from 'compression'
+import helmet from 'helmet'
+import featurePolicy from 'feature-policy'
 const errorhandler = require('errorhandler')
-const cookieParser = require('cookie-parser')
-const serveIndex = require('serve-index')
-const bodyParser = require('body-parser')
-const cors = require('cors')
+import cookieParser  from 'cookie-parser'
+import serveIndex from 'serve-index'
+import bodyParser from 'body-parser'
+import cors from 'cors'
 const securityTxt = require('express-security.txt')
 const robots = require('express-robots-txt')
-const yaml = require('js-yaml')
-const swaggerUi = require('swagger-ui-express')
+import yaml from 'js-yaml'
+import swaggerUi from 'swagger-ui-express'
 const RateLimit = require('express-rate-limit')
 const ipfilter = require('express-ipfilter').IpFilter
 const swaggerDocument = yaml.load(fs.readFileSync('./swagger.yml', 'utf8'))
@@ -68,7 +68,7 @@ const profileImageFileUpload = require('./routes/profileImageFileUpload')
 const profileImageUrlUpload = require('./routes/profileImageUrlUpload')
 const redirect = require('./routes/redirect')
 const vulnCodeSnippet = require('./routes/vulnCodeSnippet')
-const vulnCodeFixes = require('./routes/vulnCodeFixes')
+import * as vulnCodeFixes from './routes/vulnCodeFixes'
 const angular = require('./routes/angular')
 const easterEgg = require('./routes/easterEgg')
 const premiumReward = require('./routes/premiumReward')
@@ -101,7 +101,7 @@ const nftMint = require('./routes/nftMint')
 const web3Wallet = require('./routes/web3Wallet')
 const updateProductReviews = require('./routes/updateProductReviews')
 const likeProductReviews = require('./routes/likeProductReviews')
-const security = require('./lib/insecurity')
+import * as security from './lib/insecurity'
 const app = express()
 const server = require('http').Server(app)
 const appConfiguration = require('./routes/appConfiguration')
@@ -125,9 +125,9 @@ const delivery = require('./routes/delivery')
 const deluxe = require('./routes/deluxe')
 const memory = require('./routes/memory')
 const chatbot = require('./routes/chatbot')
-const locales = require('./data/static/locales.json')
-const i18n = require('i18n')
-const antiCheat = require('./lib/antiCheat')
+import locales from './data/static/locales.json'
+import i18n from 'i18n'
+import * as antiCheat from './lib/antiCheat'
 
 const appName = config.get<string>('application.customMetricsPrefix')
 const startupGauge = new Prometheus.Gauge({
@@ -650,7 +650,7 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   console.error(err)
 })
 
-const multer = require('multer')
+import multer from 'multer'
 const uploadToMemory = multer({ storage: multer.memoryStorage(), limits: { fileSize: 200000 } })
 const mimeTypeMap: any = {
   'image/png': 'png',
