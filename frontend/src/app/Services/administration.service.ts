@@ -8,6 +8,10 @@ import { HttpClient } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { catchError, map } from 'rxjs/operators'
 
+interface ApplicationVersionResponse {
+  version: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -19,7 +23,7 @@ export class AdministrationService {
 
   getApplicationVersion () {
     return this.http.get(this.host + '/application-version').pipe(
-      map((response: any) => response.version),
+      map((response: ApplicationVersionResponse) => response.version),
       catchError((error: Error) => { throw error })
     )
   }
