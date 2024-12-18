@@ -37,7 +37,7 @@ module.exports = function getUserProfile () {
               // username = eval(code) // eslint-disable-line no-eval
               try {
                 const safeCode = code.replace(/[^a-zA-Z0-9_]/g, '')
-                username = eval(safeCode) // eslint-disable-line no-eval
+                username = safeCode
               } catch (error) {
                 console.error('Error evaluating code:', error)
                 username = undefined // or handle the error appropriately
@@ -63,7 +63,7 @@ module.exports = function getUserProfile () {
           template = template.replace(/_logo_/g, utils.extractFilename(config.get('application.logo')))
           // Sanitize and escape user input
           const sanitizedUser = {
-            ...req.user,
+            ...user,
             username: xss((req.user as any)?.username)
             // Sanitize other user properties as needed
           }
