@@ -7,7 +7,8 @@ import fs from 'fs'
 import crypto from 'crypto'
 import { type Request, type Response, type NextFunction } from 'express'
 import { type UserModel } from 'models/user'
-import { expressjwt as expressJwt } from 'express-jwt'
+import { expressjwt } from 'express-jwt'
+
 import jwt from 'jsonwebtoken'
 import jws from 'jws'
 import sanitizeHtmlLib from 'sanitize-html'
@@ -46,8 +47,8 @@ export const verify = (token: string): boolean => {
   }
 }
 
-export const authorize = (req: Request, res: Response, next: NextFunction): void => {
-  expressJwt({ secret: publicKey, algorithms: ['RS256'] })(req, res, next)
+export const authorize = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  await expressjwt({ secret: publicKey, algorithms: ['RS256'] })(req, res, next)
 }
 
 export const generateToken = (user: UserModel): string => {
@@ -85,8 +86,4 @@ export const generateCoupon = (discount: number): string => {
   const couponCode = `DISCOUNT-${discount}-${Date.now()}`
   return couponCode
 }
- 
-
-
 export default module.exports
-
