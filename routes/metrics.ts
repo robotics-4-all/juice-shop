@@ -52,8 +52,18 @@ exports.observeRequestMetricsMiddleware = function observeRequestMetricsMiddlewa
   }
 }
 
+interface FileRequest extends Request {
+  file?: {
+    mimetype: string;
+    filename: string;
+    path?: string;
+    originalname?: string;
+    size?: number;
+  };
+}
+
 exports.observeFileUploadMetricsMiddleware = function observeFileUploadMetricsMiddleware () {
-  return ({ file }: Request, res: Response, next: NextFunction) => {
+  return ({ file }: FileRequest, res: Response, next: NextFunction) => {
     onFinished(res, () => {
       if (file != null) {
         res.statusCode < 400 ? fileUploadsCountMetric.labels(file.mimetype).inc() : fileUploadErrorsMetric.labels(file.mimetype).inc()
@@ -64,7 +74,7 @@ exports.observeFileUploadMetricsMiddleware = function observeFileUploadMetricsMi
 }
 
 exports.serveMetrics = function serveMetrics () {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response) => {
     challengeUtils.solveIf(challenges.exposedMetricsChallenge, () => {
       const userAgent = req.headers['user-agent'] ?? ''
       return !userAgent.includes('Prometheus')
