@@ -20,7 +20,7 @@ import isWindows from './is-windows'
 export { default as isDocker } from './is-docker'
 export { default as isWindows } from './is-windows'
 // import isGitpod from 'is-gitpod') // FIXME Roll back to this when https://github.com/dword-design/is-gitpod/issues/94 is resolve
-const isGitpod = () => false
+const isGitpod = (): boolean => false
 
 const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
 
@@ -34,25 +34,25 @@ export const queryResultToJson = <T>(
   }
 }
 
-export const isUrl = (url: string) => {
+export const isUrl = (url: string): boolean => {
   return startsWith(url, 'http')
 }
 
-export const startsWith = (str: string, prefix: string) => str ? str.indexOf(prefix) === 0 : false
+export const startsWith = (str: string, prefix: string): boolean => str ? str.indexOf(prefix) === 0 : false
 
-export const endsWith = (str?: string, suffix?: string) => (str && suffix) ? str.includes(suffix, str.length - suffix.length) : false
+export const endsWith = (str?: string, suffix?: string): boolean => (str && suffix) ? str.includes(suffix, str.length - suffix.length) : false
 
-export const contains = (str: string, element: string) => str ? str.includes(element) : false // TODO Inline all usages as this function is not adding any functionality to String.includes
+export const contains = (str: string, element: string): boolean => str ? str.includes(element) : false // TODO Inline all usages as this function is not adding any functionality to String.includes
 
-export const containsEscaped = function (str: string, element: string) {
+export const containsEscaped = function (str: string, element: string): boolean {
   return contains(str, element.replace(/"/g, '\\"'))
 }
 
-export const containsOrEscaped = function (str: string, element: string) {
+export const containsOrEscaped = function (str: string, element: string): boolean {
   return contains(str, element) || containsEscaped(str, element)
 }
 
-export const unquote = function (str: string) {
+export const unquote = function (str: string): string {
   if (str && startsWith(str, '"') && endsWith(str, '"')) {
     return str.substring(1, str.length - 1)
   } else {
@@ -60,12 +60,12 @@ export const unquote = function (str: string) {
   }
 }
 
-export const trunc = function (str: string, length: number) {
+export const trunc = function (str: string, length: number): string {
   str = str.replace(/(\r\n|\n|\r)/gm, '')
   return (str.length > length) ? str.substr(0, length - 1) + '...' : str
 }
 
-export const version = (module?: string) => {
+export const version = (module?: string): string | undefined => {
   if (module) {
     // @ts-expect-error FIXME Ignoring any type issue on purpose
     return packageJson.dependencies[module]
@@ -75,7 +75,7 @@ export const version = (module?: string) => {
 }
 
 let cachedCtfKey: string | undefined
-const getCtfKey = () => {
+const getCtfKey = (): string => {
   if (!cachedCtfKey) {
     if (process.env.CTF_KEY !== undefined && process.env.CTF_KEY !== '') {
       cachedCtfKey = process.env.CTF_KEY
@@ -86,20 +86,20 @@ const getCtfKey = () => {
   }
   return cachedCtfKey
 }
-export const ctfFlag = (text: string) => {
+export const ctfFlag = (text: string): string => {
   const shaObj = new jsSHA('SHA-1', 'TEXT') // eslint-disable-line new-cap
   shaObj.setHMACKey(getCtfKey(), 'TEXT')
   shaObj.update(text)
   return shaObj.getHMAC('HEX')
 }
 
-export const toMMMYY = (date: Date) => {
+export const toMMMYY = (date: Date): string => {
   const month = date.getMonth()
   const year = date.getFullYear()
   return months[month] + year.toString().substring(2, 4)
 }
 
-export const toISO8601 = (date: Date) => {
+export const toISO8601 = (date: Date): string => {
   let day = '' + date.getDate()
   let month = '' + (date.getMonth() + 1)
   const year = date.getFullYear()
@@ -110,7 +110,7 @@ export const toISO8601 = (date: Date) => {
   return [year, month, day].join('-')
 }
 
-export const extractFilename = (url: string) => {
+export const extractFilename = (url: string): string => {
   let file = decodeURIComponent(url.substring(url.lastIndexOf('/') + 1))
   if (contains(file, '?')) {
     file = file.substring(0, file.indexOf('?'))
@@ -118,7 +118,7 @@ export const extractFilename = (url: string) => {
   return file
 }
 
-export const downloadToFile = async (url: string, dest: string) => {
+export const downloadToFile = async (url: string, dest: string): Promise<void> => {
   try {
     const data = await download(url)
     fs.writeFileSync(dest, data)
@@ -127,7 +127,7 @@ export const downloadToFile = async (url: string, dest: string) => {
   }
 }
 
-export const jwtFrom = ({ headers }: { headers: any }) => {
+export const jwtFrom = ({ headers }: { headers: { authorization?: string } }): string | undefined => {
   if (headers?.authorization) {
     const parts = headers.authorization.split(' ')
     if (parts.length === 2) {
@@ -194,21 +194,29 @@ export function isChallengeEnabled (challenge: Challenge): boolean {
   return enabled
 }
 
-export const parseJsonCustom = (jsonString: string) => {
+interface ParsedJsonKeyValue {
+  key: string;
+  value: string | number | boolean | null;
+}
+
+export const parseJsonCustom = (jsonString: string): ParsedJsonKeyValue[] => {
   const parser = clarinet.parser()
-  const result: any[] = []
-  parser.onkey = parser.onopenobject = (k: any) => {
+  const result: ParsedJsonKeyValue[] = []
+  
+  parser.onkey = parser.onopenobject = (k: string) => {
     result.push({ key: k, value: null })
   }
-  parser.onvalue = (v: any) => {
+
+  parser.onvalue = (v: string | number | boolean | null) => {
     result[result.length - 1].value = v
   }
+
   parser.write(jsonString)
   parser.close()
   return result
 }
 
-export const toSimpleIpAddress = (ipv6: string) => {
+export const toSimpleIpAddress = (ipv6: string): string => {
   if (startsWith(ipv6, '::ffff:')) {
     return ipv6.substr(7)
   } else if (ipv6 === '::1') {
@@ -218,17 +226,17 @@ export const toSimpleIpAddress = (ipv6: string) => {
   }
 }
 
-export const getErrorMessage = (error: unknown) => {
+export const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) return error.message
   return String(error)
 }
 
-export const matchesSystemIniFile = (text: string) => {
+export const matchesSystemIniFile = (text: string): boolean => {
   const match = text.match(/; for 16-bit app support/gi)
   return match !== null && match.length >= 1
 }
 
-export const matchesEtcPasswdFile = (text: string) => {
-  const match = text.match(/(\w*:\w*:\d*:\d*:\w*:.*)|(Note that this file is consulted directly)/gi)
+export const matchesEtcPasswdFile = (text: string): boolean => {
+  const match = text.match(/(\w*:\w*::\w*::)/gi)
   return match !== null && match.length >= 1
 }

@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { type Request, type Response, type NextFunction } from 'express'
+import { type Request, type Response } from 'express'
 import { DeliveryModel } from '../models/delivery'
 
-const security = require('../lib/insecurity')
+import {isDeluxe} from '../lib/insecurity'
 
-module.exports.getDeliveryMethods = function getDeliveryMethods () {
-  return async (req: Request, res: Response, next: NextFunction) => {
+export function getDeliveryMethods () {
+  return async (req: Request, res: Response) => {
     const methods = await DeliveryModel.findAll()
     if (methods) {
       const sendMethods = []
@@ -17,7 +17,7 @@ module.exports.getDeliveryMethods = function getDeliveryMethods () {
         sendMethods.push({
           id: method.id,
           name: method.name,
-          price: security.isDeluxe(req) ? method.deluxePrice : method.price,
+          price: isDeluxe(req) ? method.deluxePrice : method.price,
           eta: method.eta,
           icon: method.icon
         })
@@ -29,14 +29,14 @@ module.exports.getDeliveryMethods = function getDeliveryMethods () {
   }
 }
 
-module.exports.getDeliveryMethod = function getDeliveryMethod () {
-  return async (req: Request, res: Response, next: NextFunction) => {
+export function getDeliveryMethod () {
+  return async (req: Request, res: Response) => {
     const method = await DeliveryModel.findOne({ where: { id: req.params.id } })
     if (method != null) {
       const sendMethod = {
         id: method.id,
         name: method.name,
-        price: security.isDeluxe(req) ? method.deluxePrice : method.price,
+        price: isDeluxe(req) ? method.deluxePrice : method.price,
         eta: method.eta,
         icon: method.icon
       }

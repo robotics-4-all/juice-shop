@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { type NextFunction, type Request, type Response } from 'express'
+import { type Request, type Response } from 'express'
 import fs from 'fs'
 import yaml from 'js-yaml'
 import { getCodeChallenges } from '../lib/codingChallenges'
@@ -21,14 +21,22 @@ interface VerdictRequestBody {
   key: string
 }
 
-const setStatusCode = (error: any) => {
-  switch (error.name) {
-    case 'BrokenBoundary':
-      return 422
-    default:
-      return 200
-  }
+interface CustomError extends Error {
+  name: string;
 }
+
+const setStatusCode = (error: unknown): number => {
+  if (error instanceof Error && 'name' in error) {
+    const customError = error as CustomError;
+    switch (customError.name) {
+      case 'BrokenBoundary':
+        return 422;
+      default:
+        return 200;
+    }
+  }
+  return 500; // Default status code for unknown errors
+};
 
 export const retrieveCodeSnippet = async (challengeKey: string) => {
   const codeChallenges = await getCodeChallenges()
@@ -38,7 +46,7 @@ export const retrieveCodeSnippet = async (challengeKey: string) => {
   return null
 }
 
-exports.serveCodeSnippet = () => async (req: Request<SnippetRequestBody, Record<string, unknown>, Record<string, unknown>>, res: Response, next: NextFunction) => {
+export default () => async (req: Request<SnippetRequestBody, Record<string, unknown>, Record<string, unknown>>, res: Response) => {
   try {
     const snippetData = await retrieveCodeSnippet(req.params.challenge)
     if (snippetData == null) {
@@ -57,7 +65,7 @@ export const retrieveChallengesWithCodeSnippet = async () => {
   return [...codeChallenges.keys()]
 }
 
-exports.serveChallengesWithCodeSnippet = () => async (req: Request, res: Response, next: NextFunction) => {
+exports.serveChallengesWithCodeSnippet = () => async (req: Request, res: Response) => {
   const codingChallenges = await retrieveChallengesWithCodeSnippet()
   res.json({ challenges: codingChallenges })
 }
@@ -71,7 +79,7 @@ export const getVerdict = (vulnLines: number[], neutralLines: number[], selected
   return notOkLines.length === 0
 }
 
-exports.checkVulnLines = () => async (req: Request<Record<string, unknown>, Record<string, unknown>, VerdictRequestBody>, res: Response, next: NextFunction) => {
+exports.checkVulnLines = () => async (req: Request<Record<string, unknown>, Record<string, unknown>, VerdictRequestBody>, res: Response) => {
   const key = req.body.key
   let snippetData
   try {

@@ -4,15 +4,15 @@
  */
 
 import challengeUtils = require('../lib/challengeUtils')
-import { type Request, type Response, type NextFunction } from 'express'
+import { type Request, type Response } from 'express'
 import { type Review } from '../data/types'
 import * as db from '../data/mongodb'
 import { challenges } from '../data/datacache'
 
 const security = require('../lib/insecurity')
 
-module.exports = function productReviews () {
-  return (req: Request, res: Response, next: NextFunction) => {
+export default function productReviews () {
+  return (req: Request, res: Response) => {
     const id = req.body.id
     const user = security.authenticatedUsers.from(req)
     db.reviewsCollection.findOne({ _id: id }).then((review: Review) => {
