@@ -3,27 +3,25 @@
  * SPDX-License-Identifier: MIT
  */
 
-import io from 'socket.io-client'
+import { setupSocket, teardownSocket } from './socketSetupFunction';
 
 describe('WebSocket', () => {
-  let socket: SocketIOClient.Socket
+  let socket: SocketIOClient.Socket;
 
-  beforeEach(done => {
-    socket = io('http://localhost:3000', {
-      reconnectionDelay: 0,
-      forceNew: true
-    })
-    socket.on('connect', () => {
-      done()
-    })
-  })
+    beforeEach((done) => {
+        socket = setupSocket(done);
+    });
 
-  afterEach(done => {
-    if (socket.connected) {
-      socket.disconnect()
-    }
-    done()
-  })
+    afterEach((done) => {
+        teardownSocket(socket, done);
+    });
+
+    it('server handles confirmation messages for emitted challenge resolutions', (done) => {
+        socket.emit('notification received', 'Find the carefully hidden \'Score Board\' page.');
+        socket.emit('notification received', 'Provoke an error that is not very gracefully handled.');
+        done();
+    });
+  
 
   it('server handles confirmation messages for emitted challenge resolutions', done => {
     socket.emit('notification received', 'Find the carefully hidden \'Score Board\' page.')

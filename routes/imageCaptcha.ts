@@ -7,10 +7,10 @@ import { type Request, type Response, type NextFunction } from 'express'
 import { ImageCaptchaModel } from '../models/imageCaptcha'
 import { Op } from 'sequelize'
 
-const svgCaptcha = require('svg-captcha')
+import svgCaptcha from 'svg-captcha'
 const security = require('../lib/insecurity')
 
-function imageCaptchas () {
+export default function imageCaptchas () {
   return (req: Request, res: Response) => {
     const captcha = svgCaptcha.create({ size: 5, noise: 2, color: true })
 

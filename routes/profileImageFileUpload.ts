@@ -3,16 +3,16 @@
  * SPDX-License-Identifier: MIT
  */
 
-import fs = require('fs')
+import fs from 'fs'
 import { type Request, type Response, type NextFunction } from 'express'
 import { UserModel } from '../models/user'
 import logger from '../lib/logger'
 
 import * as utils from '../lib/utils'
-const security = require('../lib/insecurity')
+import * as security from '../lib/insecurity'
 const fileType = require('file-type')
 
-module.exports = function fileUpload () {
+export default function fileUpload () {
   return async (req: Request, res: Response, next: NextFunction) => {
     const file = req.file
     const buffer = file?.buffer

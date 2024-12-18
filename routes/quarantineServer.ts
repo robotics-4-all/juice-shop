@@ -6,8 +6,8 @@
 import path = require('path')
 import { type Request, type Response, type NextFunction } from 'express'
 
-module.exports = function serveQuarantineFiles () {
-  return ({ params, query }: Request, res: Response, next: NextFunction) => {
+export default function serveQuarantineFiles () {
+  return ({ params }: Request, res: Response, next: NextFunction) => {
     const file = params.file
 
     if (!file.includes('/')) {
