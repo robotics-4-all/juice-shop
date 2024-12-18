@@ -288,7 +288,7 @@ export function token1 (...args: number[]) { // vuln-code-snippet neutral-line t
 } // vuln-code-snippet neutral-line tokenSaleChallenge
 
 export function token2 (...args: number[]) { // vuln-code-snippet neutral-line tokenSaleChallenge
-  const T = Array.prototype.slice.call(arguments) // vuln-code-snippet neutral-line tokenSaleChallenge
+  const T = Array.prototype.slice.call(args) // vuln-code-snippet neutral-line tokenSaleChallenge
   const M = T.shift() // vuln-code-snippet neutral-line tokenSaleChallenge
   return T.reverse().map(function (m, H) { // vuln-code-snippet neutral-line tokenSaleChallenge
     return String.fromCharCode(m - M - 24 - H) // vuln-code-snippet neutral-line tokenSaleChallenge
