@@ -44,14 +44,14 @@ const ProductModelInit = (sequelize: Sequelize) => {
         type: DataTypes.STRING,
         set (description: string) {
           if (utils.isChallengeEnabled(challenges.restfulXssChallenge)) {
-            challengeUtils.solveIf(challenges.restfulXssChallenge, () => {
+            challengeUtils.solveIf(challenges.restfulXssChallenge as unknown as challengeUtils.Challenge, () => {
               return utils.contains(
                 description,
                 '<iframe src="javascript:alert(`xss`)">'
               )
             })
           } else {
-            description = security.sanitizeSecure(description)
+            description = security.sanitizeHtml(description)
           }
           this.setDataValue('description', description)
         }
