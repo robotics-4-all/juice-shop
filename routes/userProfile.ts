@@ -6,6 +6,7 @@
 import fs = require('fs')
 import { type Request, type Response, type NextFunction } from 'express'
 import { challenges } from '../data/datacache'
+import xss from 'xss'
 
 import { UserModel } from '../models/user'
 import challengeUtils = require('../lib/challengeUtils')
@@ -33,7 +34,14 @@ module.exports = function getUserProfile () {
               if (!code) {
                 throw new Error('Username is null')
               }
-              username = eval(code) // eslint-disable-line no-eval
+              // username = eval(code) // eslint-disable-line no-eval
+              try {
+                const safeCode = code.replace(/[^a-zA-Z0-9_]/g, '')
+                username = eval(safeCode) // eslint-disable-line no-eval
+              } catch (error) {
+                console.error('Error evaluating code:', error)
+                username = undefined // or handle the error appropriately
+              }
             } catch (err) {
               username = '\\' + username
             }
@@ -53,6 +61,12 @@ module.exports = function getUserProfile () {
           template = template.replace(/_primLight_/g, theme.primLight)
           template = template.replace(/_primDark_/g, theme.primDark)
           template = template.replace(/_logo_/g, utils.extractFilename(config.get('application.logo')))
+          // Sanitize and escape user input
+          const sanitizedUser = {
+            ...req.user,
+            username: xss((req.user as any)?.username)
+            // Sanitize other user properties as needed
+          }
           const fn = pug.compile(template)
           const CSP = `img-src 'self' ${user?.profileImage}; script-src 'self' 'unsafe-eval' https://code.getmdl.io http://ajax.googleapis.com`
           // @ts-expect-error FIXME type issue with string vs. undefined for username
@@ -62,7 +76,7 @@ module.exports = function getUserProfile () {
             'Content-Security-Policy': CSP
           })
 
-          res.send(fn(user))
+          res.send(fn({ user: sanitizedUser }))
         }).catch((error: Error) => {
           next(error)
         })
