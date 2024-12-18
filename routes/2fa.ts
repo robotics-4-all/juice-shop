@@ -8,11 +8,12 @@ import { type Request, type Response } from 'express'
 import { BasketModel } from '../models/basket'
 import { UserModel } from '../models/user'
 import challengeUtils = require('../lib/challengeUtils')
+import { type Challenge } from '../lib/challengeUtils'
 import * as utils from '../lib/utils'
 import { challenges } from '../data/datacache'
+import security from '../lib/insecurity'
+import otplib from 'otplib'
 
-const security = require('../lib/insecurity')
-const otplib = require('otplib')
 
 otplib.authenticator.options = {
   // Accepts tokens as valid even when they are 30sec to old or to new
@@ -42,7 +43,9 @@ async function verify (req: Request, res: Response) {
     if (!isValid) {
       return res.status(401).send()
     }
-    challengeUtils.solveIf(challenges.twoFactorAuthUnsafeSecretStorageChallenge, () => { return user.email === 'wurstbrot@' + config.get<string>('application.domain') })
+    if (user) {
+      challengeUtils.solveIf(challenges.twoFactorAuthUnsafeSecretStorageChallenge as unknown as Challenge, () => { return user.email === 'wurstbrot@' + config.get<string>('application.domain') })
+    }
 
     const [basket] = await BasketModel.findOrCreate({ where: { UserId: userId } })
 

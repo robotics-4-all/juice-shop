@@ -18,7 +18,7 @@ const globalWithSocketIO = global as typeof globalThis & {
   io: SocketIOClientStatic & Server
 }
 
-interface Challenge {
+export interface Challenge {
   key: string
   name: string
   description: string
@@ -147,4 +147,33 @@ export const solveFixIt = async function (key: string, isRestore: boolean) {
     await calculateFixItCheatScore(solvedChallenge)
     sendCodingChallengeNotification({ key, codingChallengeStatus: 2 })
   }
+}
+
+
+export interface Challenge {
+
+  key: string
+
+  name: string
+
+  description: string
+
+  difficulty: number
+
+  solved: boolean
+
+  save: () => Promise<Challenge>
+
+  id: number
+
+  category: string
+
+  hint: string
+
+  hintUrl: string
+
+  codingChallengeStatus: 0 | 1 | 2
+
+  // Add other properties as needed
+
 }
