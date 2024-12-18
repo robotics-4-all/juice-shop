@@ -5,7 +5,7 @@
 
 import utils = require('../lib/utils')
 import challengeUtils = require('../lib/challengeUtils')
-import { type Request, type Response, type NextFunction } from 'express'
+import { type Request, type Response } from 'express'
 import { type Review } from 'data/types'
 import * as db from '../data/mongodb'
 import { challenges } from '../data/datacache'
@@ -25,8 +25,8 @@ global.sleep = (time: number) => {
   }
 }
 
-module.exports = function productReviews () {
-  return (req: Request, res: Response, next: NextFunction) => {
+export default function productReviews () {
+  return (req: Request, res: Response) => {
     const id = !utils.isChallengeEnabled(challenges.noSqlCommandChallenge) ? Number(req.params.id) : req.params.id
 
     // Measure how long the query takes, to check if there was a nosql dos attack

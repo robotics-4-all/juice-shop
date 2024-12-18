@@ -12,7 +12,7 @@ import * as utils from '../lib/utils'
 import * as security from '../lib/insecurity'
 import request from 'request'
 
-module.exports = function profileImageUrlUpload () {
+export default function profileImageUrlUpload () {
   return (req: Request, res: Response, next: NextFunction) => {
     if (req.body.imageUrl !== undefined) {
       const url = req.body.imageUrl

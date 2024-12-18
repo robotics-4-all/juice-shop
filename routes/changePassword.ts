@@ -11,7 +11,7 @@ const security = require('../lib/insecurity')
 import * as cache from '../data/datacache'
 const challenges = cache.challenges
 
-module.exports = function changePassword () {
+export default function changePassword () {
   return ({ query, headers, connection }: Request, res: Response, next: NextFunction) => {
     const currentPassword = query.current
     const newPassword = query.new

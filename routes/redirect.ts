@@ -10,7 +10,7 @@ import { challenges } from '../data/datacache'
 
 import * as security from '../lib/insecurity'
 
-module.exports = function performRedirect () {
+export default function performRedirect () {
   return ({ query }: Request, res: Response, next: NextFunction) => {
     const toUrl: string = query.to as string
     if (security.isRedirectAllowed(toUrl)) {

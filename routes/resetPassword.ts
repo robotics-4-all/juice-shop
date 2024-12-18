@@ -14,7 +14,7 @@ import * as challengeUtils from '../lib/challengeUtils'
 const users = require('../data/datacache').users
 import * as security from '../lib/insecurity'
 
-module.exports = function resetPassword () {
+export default function resetPassword () {
   return ({ body, connection }: Request, res: Response, next: NextFunction) => {
     const email = body.email
     const answer = body.answer

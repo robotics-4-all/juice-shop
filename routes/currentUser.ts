@@ -10,7 +10,7 @@ import * as security from '../lib/insecurity'
 import * as cache from '../data/datacache'
 const challenges = cache.challenges
 
-module.exports = function retrieveLoggedInUser () {
+export default function retrieveLoggedInUser () {
   return (req: Request, res: Response) => {
     let user
     try {

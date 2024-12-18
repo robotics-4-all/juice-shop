@@ -12,28 +12,32 @@ chai.use(sinonChai)
 
 const { checkUnambiguousMandatorySpecialProducts, checkUniqueSpecialOnProducts, checkYamlSchema, checkMinimumRequiredNumberOfProducts, checkUnambiguousMandatorySpecialMemories, checkMinimumRequiredNumberOfMemories, checkUniqueSpecialOnMemories, checkSpecialMemoriesHaveNoUserAssociated, checkNecessaryExtraKeysOnSpecialProducts } = require('../../lib/startup/validateConfig')
 
+function getSpecialProductConfig() {
+  return [
+    {
+      name: 'Apple Juice',
+      useForChristmasSpecialChallenge: true
+    },
+    {
+      name: 'Orange Juice',
+      urlForProductTamperingChallenge: 'foobar'
+    },
+    {
+      name: 'Melon Juice',
+      fileForRetrieveBlueprintChallenge: 'foobar',
+      exifForBlueprintChallenge: ['OpenSCAD']
+    },
+    {
+      name: 'Rippertuer Special Juice',
+      keywordsForPastebinDataLeakChallenge: ['bla', 'blubb']
+    }
+  ];
+}
+
 describe('configValidation', () => {
   describe('checkUnambiguousMandatorySpecialProducts', () => {
     it('should accept a valid config', () => {
-      const products = [
-        {
-          name: 'Apple Juice',
-          useForChristmasSpecialChallenge: true
-        },
-        {
-          name: 'Orange Juice',
-          urlForProductTamperingChallenge: 'foobar'
-        },
-        {
-          name: 'Melon Juice',
-          fileForRetrieveBlueprintChallenge: 'foobar',
-          exifForBlueprintChallenge: ['OpenSCAD']
-        },
-        {
-          name: 'Rippertuer Special Juice',
-          keywordsForPastebinDataLeakChallenge: ['bla', 'blubb']
-        }
-      ]
+      const products = getSpecialProductConfig();
 
       expect(checkUnambiguousMandatorySpecialProducts(products)).to.equal(true)
     })
@@ -80,48 +84,13 @@ describe('configValidation', () => {
 
   describe('checkNecessaryExtraKeysOnSpecialProducts', () => {
     it('should accept a valid config', () => {
-      const products = [
-        {
-          name: 'Apple Juice',
-          useForChristmasSpecialChallenge: true
-        },
-        {
-          name: 'Orange Juice',
-          urlForProductTamperingChallenge: 'foobar'
-        },
-        {
-          name: 'Melon Juice',
-          fileForRetrieveBlueprintChallenge: 'foobar',
-          exifForBlueprintChallenge: ['OpenSCAD']
-        },
-        {
-          name: 'Rippertuer Special Juice',
-          keywordsForPastebinDataLeakChallenge: ['bla', 'blubb']
-        }
-      ]
+      const products = getSpecialProductConfig();
 
       expect(checkNecessaryExtraKeysOnSpecialProducts(products)).to.equal(true)
     })
 
     it('should fail if product has no exifForBlueprintChallenge', () => {
-      const products = [
-        {
-          name: 'Apple Juice',
-          useForChristmasSpecialChallenge: true
-        },
-        {
-          name: 'Orange Juice',
-          urlForProductTamperingChallenge: 'foobar'
-        },
-        {
-          name: 'Melon Juice',
-          fileForRetrieveBlueprintChallenge: 'foobar'
-        },
-        {
-          name: 'Rippertuer Special Juice',
-          keywordsForPastebinDataLeakChallenge: ['bla', 'blubb']
-        }
-      ]
+      const products = getSpecialProductConfig()
 
       expect(checkNecessaryExtraKeysOnSpecialProducts(products)).to.equal(false)
     })
@@ -129,25 +98,7 @@ describe('configValidation', () => {
 
   describe('checkUniqueSpecialOnProducts', () => {
     it('should accept a valid config', () => {
-      const products = [
-        {
-          name: 'Apple Juice',
-          useForChristmasSpecialChallenge: true
-        },
-        {
-          name: 'Orange Juice',
-          urlForProductTamperingChallenge: 'foobar'
-        },
-        {
-          name: 'Melon Juice',
-          fileForRetrieveBlueprintChallenge: 'foobar',
-          exifForBlueprintChallenge: ['OpenSCAD']
-        },
-        {
-          name: 'Rippertuer Special Juice',
-          keywordsForPastebinDataLeakChallenge: ['bla', 'blubb']
-        }
-      ]
+      const products = getSpecialProductConfig();
 
       expect(checkUniqueSpecialOnProducts(products)).to.equal(true)
     })

@@ -11,7 +11,7 @@ import { challenges } from '../data/datacache'
 import sequelize from 'sequelize'
 const Op = sequelize.Op
 
-module.exports.continueCode = function continueCode () {
+export const continueCode = function continueCode () {
   const hashids = new Hashids('this is my salt', 60, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890')
   return (req: Request, res: Response) => {
     const ids = []
@@ -25,7 +25,7 @@ module.exports.continueCode = function continueCode () {
   }
 }
 
-module.exports.continueCodeFindIt = function continueCodeFindIt () {
+export const continueCodeFindIt = function continueCodeFindIt () {
   const hashids = new Hashids('this is the salt for findIt challenges', 60, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890')
   return async (req: Request, res: Response) => {
     const ids = []
@@ -38,7 +38,7 @@ module.exports.continueCodeFindIt = function continueCodeFindIt () {
   }
 }
 
-module.exports.continueCodeFixIt = function continueCodeFixIt () {
+export const continueCodeFixIt = function continueCodeFixIt () {
   const hashids = new Hashids('yet another salt for the fixIt challenges', 60, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890')
   return async (req: Request, res: Response) => {
     const ids = []
