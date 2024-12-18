@@ -1,7 +1,6 @@
 import fs from 'fs/promises'
 import path from 'path'
 import logger from './logger'
-import sanitizeFilename from 'sanitize-filename'
 
 export const SNIPPET_PATHS = Object.freeze(['./server.ts', './routes', './lib', './data', './data/static/web3-snippets', './frontend/src/app', './models'])
 
@@ -23,8 +22,7 @@ export const findFilesWithCodeChallenges = async (paths: readonly string[]): Pro
       const files = await fs.readdir(currPath)
       const moreMatches = await findFilesWithCodeChallenges(
         files.map(file => {
-          const sanitizedFile = sanitizeFilename(file)
-          const resolvedPath = path.resolve(currPath, sanitizedFile)
+          const resolvedPath = path.resolve(currPath, file)
           if (!resolvedPath.startsWith(currPath)) {
             throw new Error('Invalid file path')
           }
@@ -37,49 +35,18 @@ export const findFilesWithCodeChallenges = async (paths: readonly string[]): Pro
         const code = await fs.readFile(currPath, 'utf8')
         if (
           // strings are split so that it doesn't find itself...
-          code.includes('vuln-code-snippet') ||
-          code.includes('vuln-line')
+          code.includes('// vuln-code' + '-snippet start') ||
+          code.includes('# vuln-code' + '-snippet start')
         ) {
           matches.push({ path: currPath, content: code })
         }
-      } catch (err) {
-        if (err instanceof Error) {
-          logger.error(`Error reading file ${currPath}: ${err.message}`)
-        } else {
-          logger.error(`Error reading file ${currPath}: ${String(err)}`)
-        }
+      } catch (e) {
+        logger.warn(`File ${currPath} could not be read. it might have been moved or deleted. If coding challenges are contained in the file, they will not be available.`)
       }
     }
   }
+
   return matches
-}
-
-export const findCodeChallenges = (code: string, challengeKey: string): CachedCodeChallenge => {
-  const vulnPattern = `// vuln-code-snippet ${challengeKey}`
-  const neutralPattern = `// neutral-code-snippet ${challengeKey}`
-
-  // Use hardcoded regex patterns or validate user input
-  const vulnRegex = new RegExp(vulnPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')
-  const neutralRegex = new RegExp(neutralPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')
-
-  const vulnLines = []
-  const neutralLines = []
-
-  const lines = code.split('\n')
-  for (let i = 0; i < lines.length; i++) {
-    if (vulnRegex.test(lines[i])) {
-      vulnLines.push(i + 1)
-    }
-    if (neutralRegex.test(lines[i])) {
-      neutralLines.push(i + 1)
-    }
-  }
-
-  return {
-    snippet: code,
-    vulnLines,
-    neutralLines
-  }
 }
 
 function isValidChallengeKey (key: string): boolean {
