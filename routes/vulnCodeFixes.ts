@@ -1,15 +1,23 @@
-import { type NextFunction, type Request, type Response } from 'express'
+import { type Request, type Response } from 'express'
 import * as accuracy from '../lib/accuracy'
 
 const challengeUtils = require('../lib/challengeUtils')
-const fs = require('fs')
-const yaml = require('js-yaml')
+import fs from 'fs'
+import yaml from 'js-yaml'
 
 const FixesDir = 'data/static/codefixes'
 
 interface codeFix {
   fixes: string[]
   correct: number
+}
+
+declare global {
+  namespace Express {
+    interface Response {
+      __(key: string, ...args: any[]): string;
+    }
+  }
 }
 
 type cache = Record<string, codeFix>
@@ -52,7 +60,7 @@ interface VerdictRequestBody {
   selectedFix: number
 }
 
-export const serveCodeFixes = () => (req: Request<FixesRequestParams, Record<string, unknown>, Record<string, unknown>>, res: Response, next: NextFunction) => {
+export const serveCodeFixes = () => (req: Request<FixesRequestParams, Record<string, unknown>, Record<string, unknown>>, res: Response) => {
   const key = req.params.key
   const fixData = readFixes(key)
   if (fixData.fixes.length === 0) {
@@ -66,7 +74,7 @@ export const serveCodeFixes = () => (req: Request<FixesRequestParams, Record<str
   })
 }
 
-export const checkCorrectFix = () => async (req: Request<Record<string, unknown>, Record<string, unknown>, VerdictRequestBody>, res: Response, next: NextFunction) => {
+export const checkCorrectFix = () => async (req: Request<Record<string, unknown>, Record<string, unknown>, VerdictRequestBody>, res: Response) => {
   const key = req.body.key
   const selectedFix = req.body.selectedFix
   const fixData = readFixes(key)

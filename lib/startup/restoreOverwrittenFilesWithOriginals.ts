@@ -11,7 +11,6 @@ import { glob } from 'glob'
 
 import { existsSync } from 'fs';
 
-const exists = async (path: string) => await access(path).then(() => true).catch(() => false)
 
 // Helper function to safely copy files with error handling
 const safeCopyFile = async (source: string, destination: string): Promise<void> => {

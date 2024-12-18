@@ -45,7 +45,7 @@ export class FaucetComponent {
   deployedContractAddress = ''
   BEEBalance = 0
   myBEEBalance = 0
-  withdrawAmount: number = null
+  withdrawAmount: number = 0
   successResponse = false
   mintButtonDisabled = true
   challengeSolved = false
@@ -60,7 +60,7 @@ export class FaucetComponent {
     this.handleAuth()
     this.checkNftMinted()
     this.nftMintListener()
-    window.ethereum.on('chainChanged', this.handleChainChanged.bind(this))
+    window.ethereum?.on?.('chainChanged', this.handleChainChanged.bind(this));
   }
 
   nftMintListener () {
@@ -95,7 +95,7 @@ export class FaucetComponent {
 
   async fetchMyBeeBalance () {
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const provider = new ethers.providers.Web3Provider(window.ethereum as ethers.providers.ExternalProvider);
       const signer = provider.getSigner()
 
       const contract = new ethers.Contract(
@@ -122,7 +122,7 @@ export class FaucetComponent {
 
   async fetchBeeBalance () {
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const provider = new ethers.providers.Web3Provider(window.ethereum as ethers.providers.ExternalProvider);
       const signer = provider.getSigner()
 
       const contract = new ethers.Contract(
@@ -138,7 +138,7 @@ export class FaucetComponent {
     }
   }
 
-  async handleChainChanged (chainId: string) {
+  async handleChainChanged () {
     await this.handleAuth()
   }
 
@@ -161,7 +161,7 @@ export class FaucetComponent {
         chain: provider.chain.id,
         network: 'evm'
       }
-      await ethereum.request({
+      await (window.ethereum as any).request({
         method: 'wallet_addEthereumChain',
         params: [
           {
@@ -202,7 +202,7 @@ export class FaucetComponent {
       return
     }
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const provider = new ethers.providers.Web3Provider(window.ethereum as ethers.providers.ExternalProvider);
       const signer = provider.getSigner()
       const userAddress = await signer.getAddress()
 
@@ -241,7 +241,7 @@ export class FaucetComponent {
       this.nftMintText = translatedString
     })
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const provider = new ethers.providers.Web3Provider(window.ethereum as ethers.providers.ExternalProvider);
       const signer = provider.getSigner()
       const amountToApprove = ethers.utils.parseUnits('1000', '18')
       const BeeTokenContract = new ethers.Contract(
