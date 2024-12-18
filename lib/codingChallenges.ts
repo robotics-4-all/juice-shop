@@ -20,6 +20,11 @@ function sanitizePath (inputPath: string): string {
   return path.normalize(inputPath).replace(/^(\.\.(\/|\\|$))+/, '')
 }
 
+function isValidPath (basePath: string, targetPath: string): boolean {
+  const resolvedPath = path.resolve(basePath, targetPath)
+  return resolvedPath.startsWith(basePath)
+}
+
 export const findFilesWithCodeChallenges = async (paths: readonly string[]): Promise<FileMatch[]> => {
   const matches = []
   for (const currPath of paths) {
@@ -29,7 +34,7 @@ export const findFilesWithCodeChallenges = async (paths: readonly string[]): Pro
         files.map(file => {
           const sanitizedFile = sanitizePath(file)
           const resolvedPath = path.resolve(currPath, sanitizedFile)
-          if (!resolvedPath.startsWith(currPath)) {
+          if (!isValidPath(currPath, resolvedPath)) {
             throw new Error('Invalid file path')
           }
           return resolvedPath
