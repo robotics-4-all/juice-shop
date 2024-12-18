@@ -17,7 +17,7 @@ import * as utils from '../lib/utils'
 import * as db from '../data/mongodb'
 import { challenges, products } from '../data/datacache'
 
-const fs = require('fs')
+import fs from 'fs'
 const PDFDocument = require('pdfkit')
 const security = require('../lib/insecurity')
 
