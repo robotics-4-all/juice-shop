@@ -5,14 +5,14 @@
 
 import { type Request, type Response, type NextFunction } from 'express'
 import { UserModel } from '../models/user'
-import challengeUtils = require('../lib/challengeUtils')
+import * as challengeUtils from '../lib/challengeUtils'
 
 import * as utils from '../lib/utils'
 const security = require('../lib/insecurity')
-const cache = require('../data/datacache')
+import * as cache from '../data/datacache'
 const challenges = cache.challenges
 
-module.exports = function saveLoginIp () {
+export default function saveLoginIp () {
   return (req: Request, res: Response, next: NextFunction) => {
     const loggedInUser = security.authenticatedUsers.from(req)
     if (loggedInUser !== undefined) {

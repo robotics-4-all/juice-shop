@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { type Request, type Response, type NextFunction } from 'express'
+import { type Request, type Response } from 'express'
 import { CardModel } from '../models/card'
 
 interface displayCard {
@@ -15,8 +15,8 @@ interface displayCard {
   expYear: number
 }
 
-module.exports.getPaymentMethods = function getPaymentMethods () {
-  return async (req: Request, res: Response, next: NextFunction) => {
+export function getPaymentMethods () {
+  return async (req: Request, res: Response) => {
     const displayableCards: displayCard[] = []
     const cards = await CardModel.findAll({ where: { UserId: req.body.UserId } })
     cards.forEach(card => {
@@ -36,8 +36,8 @@ module.exports.getPaymentMethods = function getPaymentMethods () {
   }
 }
 
-module.exports.getPaymentMethodById = function getPaymentMethodById () {
-  return async (req: Request, res: Response, next: NextFunction) => {
+export function getPaymentMethodById () {
+  return async (req: Request, res: Response) => {
     const card = await CardModel.findOne({ where: { id: req.params.id, UserId: req.body.UserId } })
     const displayableCard: displayCard = {
       UserId: 0,
@@ -65,8 +65,8 @@ module.exports.getPaymentMethodById = function getPaymentMethodById () {
   }
 }
 
-module.exports.delPaymentMethodById = function delPaymentMethodById () {
-  return async (req: Request, res: Response, next: NextFunction) => {
+export function delPaymentMethodById () {
+  return async (req: Request, res: Response) => {
     const card = await CardModel.destroy({ where: { id: req.params.id, UserId: req.body.UserId } })
     if (card) {
       res.status(200).json({ status: 'success', data: 'Card deleted successfully.' })

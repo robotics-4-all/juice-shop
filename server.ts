@@ -41,19 +41,19 @@ import authenticatedUsers from './routes/authenticatedUsers'
 
 const startTime = Date.now()
 const finale = require('finale-rest')
-const express = require('express')
-const compression = require('compression')
-const helmet = require('helmet')
-const featurePolicy = require('feature-policy')
+import express from 'express'
+import compression from 'compression'
+import helmet from 'helmet'
+import featurePolicy from 'feature-policy'
 const errorhandler = require('errorhandler')
-const cookieParser = require('cookie-parser')
-const serveIndex = require('serve-index')
-const bodyParser = require('body-parser')
-const cors = require('cors')
+import cookieParser  from 'cookie-parser'
+import serveIndex from 'serve-index'
+import bodyParser from 'body-parser'
+import cors from 'cors'
 const securityTxt = require('express-security.txt')
 const robots = require('express-robots-txt')
-const yaml = require('js-yaml')
-const swaggerUi = require('swagger-ui-express')
+import yaml from 'js-yaml'
+import swaggerUi from 'swagger-ui-express'
 const RateLimit = require('express-rate-limit')
 const ipfilter = require('express-ipfilter').IpFilter
 const swaggerDocument = yaml.load(fs.readFileSync('./swagger.yml', 'utf8'))
@@ -64,70 +64,70 @@ const {
   checkFileType,
   handleXmlUpload
 } = require('./routes/fileUpload')
-const profileImageFileUpload = require('./routes/profileImageFileUpload')
-const profileImageUrlUpload = require('./routes/profileImageUrlUpload')
-const redirect = require('./routes/redirect')
+import profileImageFileUpload from './routes/profileImageFileUpload.js';
+import profileImageUrlUpload from './routes/profileImageUrlUpload.js';
+import redirect from './routes/redirect.js';
 const vulnCodeSnippet = require('./routes/vulnCodeSnippet')
 const vulnCodeFixes = require('./routes/vulnCodeFixes')
-const angular = require('./routes/angular')
-const easterEgg = require('./routes/easterEgg')
-const premiumReward = require('./routes/premiumReward')
-const privacyPolicyProof = require('./routes/privacyPolicyProof')
-const appVersion = require('./routes/appVersion')
-const repeatNotification = require('./routes/repeatNotification')
-const continueCode = require('./routes/continueCode')
-const restoreProgress = require('./routes/restoreProgress')
-const fileServer = require('./routes/fileServer')
-const quarantineServer = require('./routes/quarantineServer')
-const keyServer = require('./routes/keyServer')
-const logFileServer = require('./routes/logfileServer')
+import angular from './routes/angular.js';
+const easterEgg = require('./routes/easterEgg.js')
+import premiumReward from './routes/premiumReward.js';
+import privacyPolicyProof from './routes/privacyPolicyProof.js';
+import appVersion from './routes/appVersion.js';
+import repeatNotification from './routes/repeatNotification.js';
+import {continueCode, continueCodeFindIt, continueCodeFixIt} from './routes/continueCode.js';
+import { restoreProgress, restoreProgressFindIt, restoreProgressFixIt } from './routes/restoreProgress.js';
+import fileServer from './routes/fileServer.js';
+import quarantineServer from './routes/quarantineServer.js';
+import keyServer from './routes/keyServer.js';
+import logFileServer from './routes/logfileServer.js';
 const metrics = require('./routes/metrics')
-const currentUser = require('./routes/currentUser')
-const login = require('./routes/login')
-const changePassword = require('./routes/changePassword')
-const resetPassword = require('./routes/resetPassword')
-const securityQuestion = require('./routes/securityQuestion')
-const search = require('./routes/search')
-const coupon = require('./routes/coupon')
-const basket = require('./routes/basket')
-const order = require('./routes/order')
+import currentUser from './routes/currentUser.js';
+import login from './routes/login.js';
+import changePassword from './routes/changePassword.js';
+import resetPassword from './routes/resetPassword.js';
+import securityQuestion from './routes/securityQuestion.js';
+import search from './routes/search.js';
+import coupon from './routes/coupon.js';
+import basket from './routes/basket.js';
+import order from './routes/order.js';
 const verify = require('./routes/verify')
-const recycles = require('./routes/recycles')
-const b2bOrder = require('./routes/b2bOrder')
-const showProductReviews = require('./routes/showProductReviews')
-const createProductReviews = require('./routes/createProductReviews')
-const checkKeys = require('./routes/checkKeys')
-const nftMint = require('./routes/nftMint')
-const web3Wallet = require('./routes/web3Wallet')
-const updateProductReviews = require('./routes/updateProductReviews')
-const likeProductReviews = require('./routes/likeProductReviews')
+import recycles from './routes/recycles.js';
+import b2bOrder from './routes/b2bOrder.js';
+import showProductReviews from './routes/showProductReviews.js';
+import createProductReviews from './routes/createProductReviews.js';
+import {checkKeys, nftUnlocked} from './routes/checkKeys.js';
+import nftMint from './routes/nftMint.js';
+import web3Wallet from './routes/web3Wallet.js';
+import updateProductReviews from './routes/updateProductReviews.js';
+import likeProductReviews from './routes/likeProductReviews.js';
 const security = require('./lib/insecurity')
 const app = express()
 const server = require('http').Server(app)
-const appConfiguration = require('./routes/appConfiguration')
-const captcha = require('./routes/captcha')
-const trackOrder = require('./routes/trackOrder')
-const countryMapping = require('./routes/countryMapping')
+import appConfiguration from './routes/appConfiguration.js';
+import captcha from './routes/captcha.js';
+import trackOrder from './routes/trackOrder.js';
+import countryMapping from './routes/countryMapping.js';
 const basketItems = require('./routes/basketItems')
-const saveLoginIp = require('./routes/saveLoginIp')
-const userProfile = require('./routes/userProfile')
-const updateUserProfile = require('./routes/updateUserProfile')
-const videoHandler = require('./routes/videoHandler')
+import saveLoginIp from './routes/saveLoginIp.js';
+import userProfile from './routes/userProfile.js';
+import updateUserProfile from './routes/updateUserProfile.js';
+import {getVideo, promotionVideo} from './routes/videoHandler.js';
 const twoFactorAuth = require('./routes/2fa')
-const languageList = require('./routes/languages')
-const imageCaptcha = require('./routes/imageCaptcha')
-const dataExport = require('./routes/dataExport')
-const address = require('./routes/address')
-const payment = require('./routes/payment')
-const wallet = require('./routes/wallet')
-const orderHistory = require('./routes/orderHistory')
-const delivery = require('./routes/delivery')
-const deluxe = require('./routes/deluxe')
-const memory = require('./routes/memory')
+import languageList from './routes/languages.js';
+import imageCaptcha from './routes/imageCaptcha.js';
+import dataExport from './routes/dataExport.js';
+import {getAddress, getAddressById, delAddressById} from './routes/address.js';
+import {getPaymentMethodById, getPaymentMethods, delPaymentMethodById} from './routes/payment.js';
+import {addWalletBalance, getWalletBalance} from './routes/wallet.js';
+import {orderHistory, toggleDeliveryStatus, allOrders} from './routes/orderHistory.js';
+import {getDeliveryMethod, getDeliveryMethods} from './routes/delivery.js';
+import {upgradeToDeluxe, deluxeMembershipStatus} from './routes/deluxe.js';
+import {addMemory, getMemories} from './routes/memory.js';
 const chatbot = require('./routes/chatbot')
-const locales = require('./data/static/locales.json')
-const i18n = require('i18n')
-const antiCheat = require('./lib/antiCheat')
+import locales from './data/static/locales.json' 
+import i18n from 'i18n';
+import {checkForPreSolveInteractions} from './lib/antiCheat.js';
 
 const appName = config.get<string>('application.customMetricsPrefix')
 const startupGauge = new Prometheus.Gauge({
@@ -218,7 +218,7 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   app.use(robots({ UserAgent: '*', Disallow: '/ftp' }))
 
   /* Check for any URLs having been called that would be expected for challenge solving without cheating */
-  app.use(antiCheat.checkForPreSolveInteractions())
+  app.use(checkForPreSolveInteractions())
 
   /* Checks for challenges solved by retrieving a file implicitly or explicitly */
   app.use('/assets/public/images/padding', verify.accessControlChallenges())
@@ -295,7 +295,7 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   app.post('/file-upload', uploadToMemory.single('file'), ensureFileIsPassed, metrics.observeFileUploadMetricsMiddleware(), handleZipFileUpload, checkUploadSize, checkFileType, handleXmlUpload)
   app.post('/profile/image/file', uploadToMemory.single('file'), ensureFileIsPassed, metrics.observeFileUploadMetricsMiddleware(), profileImageFileUpload())
   app.post('/profile/image/url', uploadToMemory.single('file'), profileImageUrlUpload())
-  app.post('/rest/memories', uploadToDisk.single('image'), ensureFileIsPassed, security.appendUserId(), metrics.observeFileUploadMetricsMiddleware(), memory.addMemory())
+  app.post('/rest/memories', uploadToDisk.single('image'), ensureFileIsPassed, security.appendUserId(), metrics.observeFileUploadMetricsMiddleware(), addMemory())
 
   app.use(bodyParser.text({ type: '*/*' }))
   app.use(function jsonParser (req: Request, res: Response, next: NextFunction) {
@@ -363,7 +363,7 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   app.get('/api/Recycles', recycles.blockRecycleItems())
   app.post('/api/Recycles', security.isAuthorized())
   /* Challenge evaluation before finale takes over */
-  app.get('/api/Recycles/:id', recycles.getRecycleItem())
+  app.get('/api/Recycles/:id', recycles.getRecycleItems())
   app.put('/api/Recycles/:id', security.denyAll())
   app.delete('/api/Recycles/:id', security.denyAll())
   /* SecurityQuestions: Only GET list of questions allowed. */
@@ -414,22 +414,22 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   app.use('/api/PrivacyRequests/:id', security.isAuthorized())
   /* PaymentMethodRequests: Only allowed for authenticated users */
   app.post('/api/Cards', security.appendUserId())
-  app.get('/api/Cards', security.appendUserId(), payment.getPaymentMethods())
+  app.get('/api/Cards', security.appendUserId(), getPaymentMethods())
   app.put('/api/Cards/:id', security.denyAll())
-  app.delete('/api/Cards/:id', security.appendUserId(), payment.delPaymentMethodById())
-  app.get('/api/Cards/:id', security.appendUserId(), payment.getPaymentMethodById())
+  app.delete('/api/Cards/:id', security.appendUserId(), delPaymentMethodById())
+  app.get('/api/Cards/:id', security.appendUserId(), getPaymentMethodById())
   /* PrivacyRequests: Only POST allowed for authenticated users */
   app.post('/api/PrivacyRequests', security.isAuthorized())
   app.get('/api/PrivacyRequests', security.denyAll())
   app.use('/api/PrivacyRequests/:id', security.denyAll())
 
   app.post('/api/Addresss', security.appendUserId())
-  app.get('/api/Addresss', security.appendUserId(), address.getAddress())
+  app.get('/api/Addresss', security.appendUserId(), getAddress())
   app.put('/api/Addresss/:id', security.appendUserId())
-  app.delete('/api/Addresss/:id', security.appendUserId(), address.delAddressById())
-  app.get('/api/Addresss/:id', security.appendUserId(), address.getAddressById())
-  app.get('/api/Deliverys', delivery.getDeliveryMethods())
-  app.get('/api/Deliverys/:id', delivery.getDeliveryMethod())
+  app.delete('/api/Addresss/:id', security.appendUserId(), delAddressById())
+  app.get('/api/Addresss/:id', security.appendUserId(), getAddressById())
+  app.get('/api/Deliverys', getDeliveryMethods())
+  app.get('/api/Deliverys/:id', getDeliveryMethod())
   // vuln-code-snippet end changeProductChallenge
 
   /* Verify the 2FA Token */
@@ -574,12 +574,12 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   app.get('/rest/admin/application-version', appVersion())
   app.get('/rest/admin/application-configuration', appConfiguration())
   app.get('/rest/repeat-notification', repeatNotification())
-  app.get('/rest/continue-code', continueCode.continueCode())
-  app.get('/rest/continue-code-findIt', continueCode.continueCodeFindIt())
-  app.get('/rest/continue-code-fixIt', continueCode.continueCodeFixIt())
-  app.put('/rest/continue-code-findIt/apply/:continueCode', restoreProgress.restoreProgressFindIt())
-  app.put('/rest/continue-code-fixIt/apply/:continueCode', restoreProgress.restoreProgressFixIt())
-  app.put('/rest/continue-code/apply/:continueCode', restoreProgress.restoreProgress())
+  app.get('/rest/continue-code', continueCode())
+  app.get('/rest/continue-code-findIt', continueCodeFindIt())
+  app.get('/rest/continue-code-fixIt', continueCodeFixIt())
+  app.put('/rest/continue-code-findIt/apply/:continueCode', restoreProgressFindIt())
+  app.put('/rest/continue-code-fixIt/apply/:continueCode', restoreProgressFixIt())
+  app.put('/rest/continue-code/apply/:continueCode', restoreProgress())
   app.get('/rest/admin/application-version', appVersion())
   app.get('/rest/captcha', captcha())
   app.get('/rest/image-captcha', imageCaptcha())
@@ -589,14 +589,14 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   app.post('/rest/user/data-export', security.appendUserId(), imageCaptcha.verifyCaptcha())
   app.post('/rest/user/data-export', security.appendUserId(), dataExport())
   app.get('/rest/languages', languageList())
-  app.get('/rest/order-history', orderHistory.orderHistory())
-  app.get('/rest/order-history/orders', security.isAccounting(), orderHistory.allOrders())
-  app.put('/rest/order-history/:id/delivery-status', security.isAccounting(), orderHistory.toggleDeliveryStatus())
-  app.get('/rest/wallet/balance', security.appendUserId(), wallet.getWalletBalance())
-  app.put('/rest/wallet/balance', security.appendUserId(), wallet.addWalletBalance())
-  app.get('/rest/deluxe-membership', deluxe.deluxeMembershipStatus())
-  app.post('/rest/deluxe-membership', security.appendUserId(), deluxe.upgradeToDeluxe())
-  app.get('/rest/memories', memory.getMemories())
+  app.get('/rest/order-history', orderHistory())
+  app.get('/rest/order-history/orders', security.isAccounting(), allOrders())
+  app.put('/rest/order-history/:id/delivery-status', security.isAccounting(), toggleDeliveryStatus())
+  app.get('/rest/wallet/balance', security.appendUserId(), getWalletBalance())
+  app.put('/rest/wallet/balance', security.appendUserId(), addWalletBalance())
+  app.get('/rest/deluxe-membership', deluxeMembershipStatus())
+  app.post('/rest/deluxe-membership', security.appendUserId(), upgradeToDeluxe())
+  app.get('/rest/memories', getMemories())
   app.get('/rest/chatbot/status', chatbot.status())
   app.post('/rest/chatbot/respond', chatbot.process())
   /* NoSQL API endpoints */
@@ -606,8 +606,8 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   app.post('/rest/products/reviews', security.isAuthorized(), likeProductReviews())
 
   /* Web3 API endpoints */
-  app.post('/rest/web3/submitKey', checkKeys.checkKeys())
-  app.get('/rest/web3/nftUnlocked', checkKeys.nftUnlocked())
+  app.post('/rest/web3/submitKey', checkKeys())
+  app.get('/rest/web3/nftUnlocked', nftUnlocked())
   app.get('/rest/web3/nftMintListen', nftMint.nftMintListener())
   app.post('/rest/web3/walletNFTVerify', nftMint.walletNFTVerify())
   app.post('/rest/web3/walletExploitAddress', web3Wallet.contractExploitListener())
@@ -627,8 +627,8 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   app.get('/redirect', redirect())
 
   /* Routes for promotion video page */
-  app.get('/promotion', videoHandler.promotionVideo())
-  app.get('/video', videoHandler.getVideo())
+  app.get('/promotion', promotionVideo())
+  app.get('/video', getVideo())
 
   /* Routes for profile page */
   app.get('/profile', security.updateAuthenticatedUsers(), userProfile())

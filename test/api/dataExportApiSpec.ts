@@ -8,11 +8,47 @@ import { expect } from '@jest/globals'
 import config from 'config'
 import path from 'path'
 
+
+const appDomain: string = config.get<string>('application.domain');
+
 const fs = require('fs')
 
 const jsonHeader = { 'content-type': 'application/json' }
 const REST_URL = 'http://localhost:3000/rest'
 
+
+
+function testDataExport(jsonLogin: any, REST_URL: string) {
+  return frisby.get(REST_URL + '/image-captcha', {
+    headers: { 
+      Authorization: 'Bearer ' + jsonLogin.authentication.token, 
+      'content-type': 'application/json' 
+    }
+  })
+  .expect('status', 200)
+  .expect('header', 'content-type', /application\/json/)
+  .then(({ json: captchaAnswer }) => {
+    return frisby.post(REST_URL + '/user/data-export', {
+      headers: { 
+        Authorization: 'Bearer ' + jsonLogin.authentication.token, 
+        'content-type': 'application/json' 
+      },
+      body: {
+        answer: captchaAnswer.answer,
+        format: 1
+      }
+    })
+    .expect('status', 200)
+    .expect('header', 'content-type', /application\/json/)
+    .expect('json', 'confirmation', 'Your data export will open in a new Browser window.')
+    .then(({ json }) => {
+      const parsedData = JSON.parse(json.userData);
+      expect(parsedData.username).toBe('');
+      expect(parsedData.email).toBe('jim@' + appDomain);
+      return json;
+    });
+  });
+}
 describe('/rest/user/data-export', () => {
   it('Export data without use of CAPTCHA', () => {
     return frisby.post(REST_URL + '/user/login', {
@@ -242,23 +278,8 @@ describe('/rest/user/data-export', () => {
         })
           .expect('status', 200)
           .then(() => {
-            return frisby.get(REST_URL + '/image-captcha', {
-              headers: { Authorization: 'Bearer ' + jsonLogin.authentication.token, 'content-type': 'application/json' }
-            })
-              .expect('status', 200)
-              .expect('header', 'content-type', /application\/json/)
-              .then(({ json: captchaAnswer }) => {
-                return frisby.post(REST_URL + '/user/data-export', {
-                  headers: { Authorization: 'Bearer ' + jsonLogin.authentication.token, 'content-type': 'application/json' },
-                  body: {
-                    answer: captchaAnswer.answer,
-                    format: 1
-                  }
-                })
-                  .expect('status', 200)
-                  .expect('header', 'content-type', /application\/json/)
-                  .expect('json', 'confirmation', 'Your data export will open in a new Browser window.')
-                  .then(({ json }) => {
+          testDataExport(jsonLogin, REST_URL)
+          .then(({ json }:any) => {
                     const parsedData = JSON.parse(json.userData)
                     expect(parsedData.username).toBe('')
                     expect(parsedData.email).toBe('amy@' + config.get<string>('application.domain'))
@@ -345,31 +366,13 @@ describe('/rest/user/data-export', () => {
         })
           .expect('status', 200)
           .then(() => {
-            return frisby.get(REST_URL + '/image-captcha', {
-              headers: { Authorization: 'Bearer ' + jsonLogin.authentication.token, 'content-type': 'application/json' }
-            })
-              .expect('status', 200)
-              .expect('header', 'content-type', /application\/json/)
-              .then(({ json: captchaAnswer }) => {
-                return frisby.post(REST_URL + '/user/data-export', {
-                  headers: { Authorization: 'Bearer ' + jsonLogin.authentication.token, 'content-type': 'application/json' },
-                  body: {
-                    answer: captchaAnswer.answer,
-                    format: 1
-                  }
-                })
-                  .expect('status', 200)
-                  .expect('header', 'content-type', /application\/json/)
-                  .expect('json', 'confirmation', 'Your data export will open in a new Browser window.')
-                  .then(({ json }) => {
-                    const parsedData = JSON.parse(json.userData)
-                    expect(parsedData.username).toBe('')
-                    expect(parsedData.email).toBe('jim@' + config.get<string>('application.domain'))
+            testDataExport(jsonLogin, REST_URL)
+            .then(({ json }:any) => {
+              const parsedData = JSON.parse(json.userData)
                     expect(parsedData.memories[0].caption).toBe('Valid Image')
                     expect(parsedData.memories[0].imageUrl).toContain('assets/public/images/uploads/valid-image')
                   })
               })
           })
       })
-  })
-})
+  

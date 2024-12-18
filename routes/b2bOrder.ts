@@ -9,10 +9,10 @@ import challengeUtils = require('../lib/challengeUtils')
 
 import * as utils from '../lib/utils'
 import { challenges } from '../data/datacache'
-const security = require('../lib/insecurity')
+import * as security from '../lib/insecurity'
 const safeEval = require('notevil')
 
-module.exports = function b2bOrder () {
+export default function b2bOrder () {
   return ({ body }: Request, res: Response, next: NextFunction) => {
     if (utils.isChallengeEnabled(challenges.rceChallenge) || utils.isChallengeEnabled(challenges.rceOccupyChallenge)) {
       const orderLinesData = body.orderLinesData || ''

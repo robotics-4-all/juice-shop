@@ -11,11 +11,11 @@ import * as utils from '../lib/utils'
 import { AllHtmlEntities as Entities } from 'html-entities'
 import { challenges } from '../data/datacache'
 
-const pug = require('pug')
+import pug from 'pug'
 const themes = require('../views/themes/themes').themes
 const entities = new Entities()
 
-exports.getVideo = () => {
+export const getVideo = () => {
   return (req: Request, res: Response) => {
     const path = videoPath()
     const stat = fs.statSync(path)
@@ -47,7 +47,7 @@ exports.getVideo = () => {
   }
 }
 
-exports.promotionVideo = () => {
+export const promotionVideo = () => {
   return (req: Request, res: Response) => {
     fs.readFile('views/promotionVideo.pug', function (err, buf) {
       if (err != null) throw err
