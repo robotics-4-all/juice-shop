@@ -114,8 +114,20 @@ function loadHint (hint: ChallengeHint): HTMLElement {
   // Parse Markdown and sanitize the output
   const sanitizedHTML = DOMPurify.sanitize(snarkdown(hint.text));
 
-  // Safely insert sanitized HTML into the DOM
-  textBox.innerHTML = sanitizedHTML;
+  // Use DOMParser to safely parse sanitized HTML into DOM nodes
+const parser = new DOMParser();
+const doc = parser.parseFromString(sanitizedHTML, 'text/html');
+
+// Create a DocumentFragment to efficiently append nodes
+const fragment = document.createDocumentFragment();
+
+// Append each child node of the parsed HTML to the fragment
+Array.from(doc.body.childNodes).forEach((node) => {
+  fragment.appendChild(node);
+});
+
+// Safely append the fragment to the target element
+textBox.appendChild(fragment);
 
   const cancelButton = document.createElement('button')
   cancelButton.id = 'cancelButton'
