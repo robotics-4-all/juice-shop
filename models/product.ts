@@ -4,16 +4,18 @@
  */
 
 /* jslint node: true */
-import * as utils from '../lib/utils'
-import * as challengeUtils from '../lib/challengeUtils'
 import {
+  utils,
+  challengeUtils,
   Model,
-  type InferAttributes,
-  type InferCreationAttributes,
-  DataTypes,
-  type CreationOptional,
-  type Sequelize
-} from 'sequelize'
+  DataTypes
+} from './commonImports'
+import type {
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional,
+  Sequelize
+} from './commonImports'
 import { type BasketItemModel } from './basketitem'
 import { challenges } from '../data/datacache'
 import * as security from '../lib/insecurity'
@@ -51,7 +53,7 @@ const ProductModelInit = (sequelize: Sequelize) => {
               )
             })
           } else {
-            description = security.sanitizeSecure(description)
+            description = security.sanitizeHtml(description)
           }
           this.setDataValue('description', description)
         }
