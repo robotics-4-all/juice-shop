@@ -121,6 +121,7 @@
     "compression": "^1.7.4",
     "concurrently": "^5.3.0",
     "config": "^3.3.9",
+    "cookie": "^1.0.2",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
     "dompurify": "^3.2.3",
