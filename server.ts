@@ -41,19 +41,19 @@ import authenticatedUsers from './routes/authenticatedUsers'
 
 const startTime = Date.now()
 const finale = require('finale-rest')
-const express = require('express')
-const compression = require('compression')
-const helmet = require('helmet')
-const featurePolicy = require('feature-policy')
-const errorhandler = require('errorhandler')
-const cookieParser = require('cookie-parser')
-const serveIndex = require('serve-index')
-const bodyParser = require('body-parser')
-const cors = require('cors')
+import express from 'express'
+import compression from 'compression'
+import helmet from 'helmet'
+import featurePolicy from 'feature-policy'
+import errorhandler from 'errorhandler'
+import cookieParser from 'cookie-parser'
+import serveIndex from 'serve-index'
+import bodyParser from 'body-parser'
+import cors from 'cors'
 const securityTxt = require('express-security.txt')
 const robots = require('express-robots-txt')
-const yaml = require('js-yaml')
-const swaggerUi = require('swagger-ui-express')
+import yaml from 'js-yaml'
+import swaggerUi from 'swagger-ui-express'
 const RateLimit = require('express-rate-limit')
 const ipfilter = require('express-ipfilter').IpFilter
 const swaggerDocument = yaml.load(fs.readFileSync('./swagger.yml', 'utf8'))

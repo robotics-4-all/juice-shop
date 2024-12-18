@@ -14,11 +14,7 @@ import {
 } from 'solidity-browser-compiler'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const client = createClient({
-  autoConnect: true,
-  provider: getDefaultProvider()
-})
-const { ethereum } = window
+
 const compilerReleases = {
   '0.8.21': 'soljson-v0.8.21+commit.d9974bed.js',
   '0.8.9': 'soljson-v0.8.9+commit.e5eed63a.js',
@@ -35,6 +31,7 @@ const compilerReleases = {
   templateUrl: './web3-sandbox.component.html',
   styleUrls: ['./web3-sandbox.component.scss']
 })
+
 export class Web3SandboxComponent {
   constructor (
     private readonly keysService: KeysService,
@@ -44,16 +41,16 @@ export class Web3SandboxComponent {
 
   ngOnInit (): void {
     this.handleAuth()
-    window.ethereum.on('chainChanged', this.handleChainChanged.bind(this))
+    window.ethereum?.on?.('chainChanged', this.handleChainChanged.bind(this));
   }
 
   userData: object
   session = false
   metamaskAddress = ''
-  selectedContractName: string
-  compiledContracts = []
+  selectedContractName: string = ''
+  compiledContracts = null
   deployedContractAddress = ''
-  contractNames = []
+  contractNames = null
   commonGweiValue: number = 0
   contractFunctions = []
   invokeOutput = ''
@@ -90,19 +87,22 @@ contract HelloWorld {
 
       const compilerInput = {
         version: `https://binaries.soliditylang.org/bin/${selectedVersion}`,
-        contractBody: code
-      }
-      const output = await solidityCompiler(compilerInput)
+        contractBody: code,
+        options: {}, // Add a default options object
+      };
+      
+      const output = await solidityCompiler(compilerInput);
+      
       if (output.errors && output.errors.length > 0 && !output.contracts) {
-        this.compiledContracts = null
-        console.log(output.errors)
-        this.compilerErrors.push(...output.errors)
+        this.compiledContracts = null;
+        console.log(output.errors);
+        this.compilerErrors.push(...output.errors);
       } else {
-        this.compilerErrors = []
-        console.log('output', output)
-        this.compiledContracts = output.contracts.Compiled_Contracts
-        this.contractNames = Object.keys(this.compiledContracts)
-        this.selectedContractName = this.contractNames[0]
+        this.compilerErrors = [];
+        console.log('output', output);
+        this.compiledContracts = output.contracts.Compiled_Contracts;
+        this.contractNames = Object.keys(this.compiledContracts);
+        this.selectedContractName = this.contractNames[0];
       }
     } catch (error) {
       console.error('Error compiling contracts:', error)
@@ -123,7 +123,7 @@ contract HelloWorld {
         return
       }
 
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const provider = new ethers.providers.Web3Provider(window.ethereum as ethers.providers.ExternalProvider);
       const signer = provider.getSigner()
 
       const contractBytecode = selectedContract.evm.bytecode.object
@@ -187,7 +187,7 @@ contract HelloWorld {
       const selectedContract =
         this.compiledContracts[this.selectedContractName]
 
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
+        const provider = new ethers.providers.Web3Provider(window.ethereum as ethers.providers.ExternalProvider);
       const signer = provider.getSigner()
       const contract = new ethers.Contract(
         this.deployedContractAddress,
@@ -272,7 +272,7 @@ contract HelloWorld {
         chain: provider.chain.id,
         network: 'evm'
       }
-      await ethereum.request({
+      await window.ethereum?.request?.({
         method: 'wallet_addEthereumChain',
         params: [
           {

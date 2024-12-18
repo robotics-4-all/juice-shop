@@ -5,6 +5,8 @@
 
 import snarkdown from 'snarkdown'
 
+import DOMPurify from 'dompurify';
+
 import { LoginAdminInstruction } from './challenges/loginAdmin'
 import { DomXssInstruction } from './challenges/domXss'
 import { ScoreBoardInstruction } from './challenges/scoreBoard'
@@ -108,7 +110,24 @@ function loadHint (hint: ChallengeHint): HTMLElement {
 
   const textBox = document.createElement('span')
   textBox.style.flexGrow = '2'
-  textBox.innerHTML = snarkdown(hint.text)
+
+  // Parse Markdown and sanitize the output
+  const sanitizedHTML = DOMPurify.sanitize(snarkdown(hint.text));
+
+  // Use DOMParser to safely parse sanitized HTML into DOM nodes
+const parser = new DOMParser();
+const doc = parser.parseFromString(sanitizedHTML, 'text/html');
+
+// Create a DocumentFragment to efficiently append nodes
+const fragment = document.createDocumentFragment();
+
+// Append each child node of the parsed HTML to the fragment
+Array.from(doc.body.childNodes).forEach((node) => {
+  fragment.appendChild(node);
+});
+
+// Safely append the fragment to the target element
+textBox.appendChild(fragment);
 
   const cancelButton = document.createElement('button')
   cancelButton.id = 'cancelButton'
@@ -135,15 +154,19 @@ function loadHint (hint: ChallengeHint): HTMLElement {
 
   wrapper.appendChild(relAnchor)
 
-  if (hint.fixtureAfter) {
-    // insertAfter does not exist so we simulate it this way
-    target.parentElement.insertBefore(wrapper, target.nextSibling)
+  if (target.parentElement) {
+    if (hint.fixtureAfter) {
+      // insertAfter does not exist so we simulate it this way
+      target.parentElement.insertBefore(wrapper, target.nextSibling)
+    } else {
+      target.parentElement.insertBefore(wrapper, target)
+    }
   } else {
-    target.parentElement.insertBefore(wrapper, target)
+    console.error('target.parentElement is null')
   }
-
+  
   return wrapper
-}
+  }
 
 async function waitForDoubleClick (element: HTMLElement) {
   return await new Promise((resolve) => {
@@ -182,7 +205,12 @@ export async function startHackingInstructorFor (challengeName: string): Promise
     if (!hint.unskippable) {
       continueConditions.push(waitForDoubleClick(element))
     }
-    continueConditions.push(waitForCancel(document.getElementById('cancelButton')))
+    const cancelButton = document.getElementById('cancelButton')
+    if (cancelButton) {
+      continueConditions.push(waitForCancel(cancelButton))
+    } else {
+      console.error('Cancel button not found')
+    }
 
     const command = await Promise.race(continueConditions)
     if (command === 'break') {

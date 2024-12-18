@@ -35,7 +35,7 @@ const validatePreconditions = async ({ exitOnFailure = true } = {}) => {
     checkIfRequiredFileExists('frontend/dist/frontend/vendor.js'),
     checkIfPortIsAvailable(process.env.PORT ?? config.get<number>('server.port')),
     checkIfDomainReachable('https://www.alchemy.com/')
-  ])).every(condition => condition)
+  ])).every((condition: boolean) => condition)
 
   if ((!success || !asyncConditions) && exitOnFailure) {
     logger.error(colors.red('Exiting due to unsatisfied precondition!'))
@@ -114,16 +114,23 @@ export const checkIfPortIsAvailable = async (port: number | string) => {
   })
 }
 
-export const checkIfRequiredFileExists = async (pathRelativeToProjectRoot: string) => {
-  const fileName = pathRelativeToProjectRoot.substr(pathRelativeToProjectRoot.lastIndexOf('/') + 1)
+export const checkIfRequiredFileExists = async (pathRelativeToProjectRoot: string): Promise<boolean> => {
+  try {
+    // Extract the file name safely
+    const fileName = path.basename(pathRelativeToProjectRoot);
 
-  return await access(path.resolve(pathRelativeToProjectRoot)).then(() => {
-    logger.info(`Required file ${colors.bold(fileName)} is present (${colors.green('OK')})`)
-    return true
-  }).catch(() => {
-    logger.warn(`Required file ${colors.bold(fileName)} is missing (${colors.red('NOT OK')})`)
-    return false
-  })
-}
+    // Check file access
+    await access(path.resolve(pathRelativeToProjectRoot));
+    
+    // Log success
+    logger.info(`Required file ${colors.bold(fileName)} is present (${colors.green('OK')})`);
+    return true;
+  } catch {
+    // Log failure
+    const fileName = path.basename(pathRelativeToProjectRoot); // Ensure fileName is extracted even in catch block
+    logger.warn(`Required file ${colors.bold(fileName)} is missing (${colors.red('NOT OK')})`);
+    return false;
+  }
+};
 
 export default validatePreconditions

@@ -34,7 +34,7 @@ export class WalletWeb3Component {
   session = false
   walletBalance = '0'
   myBEEBalance = 0
-  inputAmount: number = null
+  inputAmount: number = 0
   successResponse = false
   mintButtonDisabled = true
   challengeSolved = false
@@ -42,16 +42,16 @@ export class WalletWeb3Component {
   metamaskAddress = ''
   ngOnInit (): void {
     this.handleAuth()
-    window.ethereum.on('chainChanged', this.handleChainChanged.bind(this))
+    window.ethereum?.on?.('chainChanged', this.handleChainChanged.bind(this));
   }
 
-  async handleChainChanged (chainId: string) {
+  async handleChainChanged () {
     await this.handleAuth()
   }
 
   async depositETH () {
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const provider = new ethers.providers.Web3Provider(window.ethereum as ethers.providers.ExternalProvider);
       const signer = provider.getSigner()
 
       const contract = new ethers.Contract(BankAddress, web3WalletABI, signer)
@@ -69,7 +69,7 @@ export class WalletWeb3Component {
 
   async withdrawETH () {
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const provider = new ethers.providers.Web3Provider(window.ethereum as ethers.providers.ExternalProvider);
       const signer = provider.getSigner()
 
       const contract = new ethers.Contract(BankAddress, web3WalletABI, signer)
@@ -87,7 +87,7 @@ export class WalletWeb3Component {
 
   async getUserEthBalance () {
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const provider = new ethers.providers.Web3Provider(window.ethereum as ethers.providers.ExternalProvider);
       const signer = provider.getSigner()
       const contract = new ethers.Contract(BankAddress, web3WalletABI, signer)
       const userBalance = await contract.balanceOf(this.metamaskAddress)
@@ -128,7 +128,7 @@ export class WalletWeb3Component {
         chain: provider.chain.id,
         network: 'evm'
       }
-      await ethereum.request({
+      await window.ethereum?.request?.({
         method: 'wallet_addEthereumChain',
         params: [
           {

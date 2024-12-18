@@ -15,7 +15,9 @@
     "lib": [
       "es2020",
       "dom"
-    ]
+    ],
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "types": ["node", "jest"]
   },
   "include" : [
     "cypress/**/*.ts",
@@ -28,7 +30,9 @@
     "views/**/*.ts",
     "views/**/*.js",
     "rsn/**/*.ts",
-    "*.ts"
+    "*.ts",
+    "src/**/*.ts",
+    "test/**/*.ts",
   ],
   "exclude": [
     "node_modules",
