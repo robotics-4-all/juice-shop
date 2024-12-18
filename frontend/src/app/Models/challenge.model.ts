@@ -6,6 +6,7 @@
 import { type SafeHtml } from '@angular/platform-browser'
 
 export interface Challenge {
+  id: string;  // Add the `id` field here
   name: string
   key: string
   category: string
