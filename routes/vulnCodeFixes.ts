@@ -2,8 +2,8 @@ import { type Request, type Response } from 'express'
 import * as accuracy from '../lib/accuracy'
 
 const challengeUtils = require('../lib/challengeUtils')
-const fs = require('fs')
-const yaml = require('js-yaml')
+import fs from 'fs'
+import yaml from 'js-yaml'
 
 const FixesDir = 'data/static/codefixes'
 
