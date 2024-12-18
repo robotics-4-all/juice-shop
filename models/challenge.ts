@@ -21,8 +21,8 @@ InferCreationAttributes<Challenge>
   declare category: string
   declare description: string
   declare difficulty: number
-  declare hint: string | null
-  declare hintUrl: string | null
+  declare hint: string
+  declare hintUrl: string
   declare mitigationUrl: CreationOptional<string> | null
   declare key: string
   declare disabledEnv: CreationOptional<string> | null

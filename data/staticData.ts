@@ -1,11 +1,28 @@
 import path from 'path'
-import { readFile } from 'fs/promises'
+import fs from 'fs/promises'
 import { safeLoad } from 'js-yaml'
 import logger from '../lib/logger'
 
+// Function to sanitize the file path
+function sanitizePath (inputPath: string): string {
+  return path.normalize(inputPath).replace(/^(\.\.(\/|\\|$))+/, '')
+}
+
+// Function to validate the file path
+function isValidPath (basePath: string, targetPath: string): boolean {
+  const resolvedPath = path.resolve(basePath, targetPath)
+  return resolvedPath.startsWith(basePath)
+}
+
 export async function loadStaticData (file: string) {
-  const filePath = path.resolve('./data/static/' + file + '.yml')
-  return await readFile(filePath, 'utf8')
+  const sanitizedFile = sanitizePath(file)
+  const filePath = path.resolve('./data/static/', sanitizedFile + '.yml')
+
+  if (!isValidPath('./data/static/', filePath)) {
+    throw new Error('Invalid file path')
+  }
+
+  return await fs.readFile(filePath, 'utf8')
     .then(safeLoad)
     .catch(() => logger.error('Could not open file: "' + filePath + '"'))
 }
